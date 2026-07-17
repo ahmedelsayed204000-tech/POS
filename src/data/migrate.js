@@ -1,4 +1,5 @@
 import DEF from './defaults';
+import { enrichHabit } from '../utils/habitSupport';
 
 export const LEGACY_KEYS = ['pos_v7', 'pos_v6', 'pos_v5', 'pos_v4', 'pos_v3'];
 
@@ -26,7 +27,8 @@ export const migrateData = (raw) => {
   data.finance = { ...DEF.finance, ...data.finance, assets: data.finance?.assets ?? [], liabilities: data.finance?.liabilities ?? [] };
   data.learn = { ...DEF.learn, ...data.learn, sessions: data.learn?.sessions ?? [] };
   data.fitness = { ...DEF.fitness, ...data.fitness, workouts: data.fitness?.workouts ?? [], weights: data.fitness?.weights ?? [] };
-  data.habits = { ...DEF.habits, ...data.habits, defs: data.habits?.defs ?? DEF.habits.defs, logs: data.habits?.logs ?? {} };
+  data.habits = { ...DEF.habits, ...data.habits, defs: (data.habits?.defs ?? DEF.habits.defs).map(enrichHabit), logs: data.habits?.logs ?? {} };
+  data.habitRecoveries = data.habitRecoveries ?? [];
   data.timeLog = data.timeLog ?? [];
   data.goals = data.goals ?? [];
   data.career = data.career ?? [];

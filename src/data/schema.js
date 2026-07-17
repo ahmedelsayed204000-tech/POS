@@ -30,9 +30,10 @@ export const personalDataSchema = z.object({
     opportunities: z.array(z.object({ id, organization: z.string(), role: z.string(), type: z.enum(['job', 'promotion', 'freelance', 'internship', 'research']), status: z.enum(['interested', 'applied', 'screening', 'interview', 'offer', 'accepted', 'rejected', 'withdrawn']), date: z.string(), nextAction: z.string(), notes: z.string() })),
   }),
   habits: z.object({
-    defs: z.array(z.object({ id, cat: z.string(), name: z.string().min(1), tgt: z.number().finite() })),
+    defs: z.array(z.object({ id, cat: z.string(), name: z.string().min(1), tgt: z.number().finite(), desiredBehavior: z.string().optional(), habitType: z.enum(['build', 'reduce', 'stop']).optional(), personalReason: z.string().optional(), cue: z.string().optional(), minimumVersion: z.string().optional(), normalVersion: z.string().optional(), stretchVersion: z.string().optional(), preferredTime: z.enum(['morning', 'midday', 'evening', 'anytime']).optional(), preferredLocation: z.string().optional(), replacementBehavior: z.string().optional(), recoveryPlan: z.string().optional(), perceivedEffort: z.number().int().min(1).max(5).optional(), passiveDetectionConsent: z.boolean().optional() })),
     logs: z.record(z.union([z.boolean(), z.string(), z.number()])),
   }),
+  habitRecoveries: z.array(z.object({ id, habitId: id, date, note: z.string(), createdAt: z.string() })),
   timeLog: z.array(z.object({ id, date, cat: z.string(), act: z.string(), hrs: z.number().finite().nonnegative() })),
   finance: z.object({
     income: z.array(moneyEntry.extend({ src: z.string() })),

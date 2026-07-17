@@ -4,6 +4,7 @@ export const STORAGE_KEY = 'pos_final';
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
 import { fmt, NOW, YR, MO } from '../utils/dates';
+import { enrichHabit } from '../utils/habitSupport';
 const d = (daysAgo) => fmt(new Date(YR, MO, NOW.getDate() - daysAgo));
 const TODAY = fmt(NOW);
 const MP    = TODAY.slice(0, 7);   // "YYYY-MM"
@@ -104,6 +105,7 @@ const DEF = {
     ],
     logs: {},
   },
+  habitRecoveries: [],
 
   // ── TIME LOG ─────────────────────────────────────────────────────────────────
   timeLog: [
@@ -282,5 +284,7 @@ const DEF = {
     notionUrl:     '',
   },
 };
+
+DEF.habits.defs = DEF.habits.defs.map(enrichHabit);
 
 export default DEF;

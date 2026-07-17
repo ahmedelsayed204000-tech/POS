@@ -96,7 +96,7 @@ Some recommendations are currently presentation rules rather than a complete ada
 - Daily garden progress and positive completion feedback.
 - Existing habit definitions and date-keyed completion logs are preserved underneath the garden experience.
 
-The current habit schema does not yet implement the full cue/minimum/normal/stretch/recovery model proposed for the behavior-support roadmap.
+The Habit Builder now enriches existing Goal Garden habits with a personal reason, stable cue, minimum/normal/stretch versions, preferred context, perceived effort, and recovery plan. Minimum completion is explicitly treated as valid success, while normal and stretch versions represent additional intensity. Legacy boolean completion history remains supported.
 
 ### Garden workspace and check-ins
 

@@ -41,3 +41,10 @@ test('preserves behavior choices while adding new consent defaults', () => {
   expect(result.behaviorPreferences.consent.behaviorEvents).toBe(true);
   expect(result.behaviorPreferences.consent.passiveDetection).toBe(false);
 });
+
+test('enriches legacy habits with a minimum version and recovery plan', () => {
+  const result = migrateData({ habits: { defs: [{ id: 9, cat: 'x', name: 'Walk', tgt: 4 }], logs: {} } });
+  expect(result.habits.defs[0].minimumVersion).toMatch(/two minutes/i);
+  expect(result.habits.defs[0].recoveryPlan).toMatch(/resume/i);
+  expect(result.habitRecoveries).toEqual([]);
+});

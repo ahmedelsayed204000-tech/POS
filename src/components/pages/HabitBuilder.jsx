@@ -1,0 +1,31 @@
+import React, { useMemo, useState } from 'react';
+import C from '../../constants/theme';
+import { completionLabel, completionLevels, enrichHabit } from '../../utils/habitSupport';
+import { Button, CardHeader, Input, Label, Select, Textarea } from '../ui';
+
+const card = { background: '#fff', borderRadius: 12, boxShadow: '0 1px 6px rgba(0,0,0,.07)', overflow: 'hidden' };
+
+export default function HabitBuilder({ data, setData, dateContext }) {
+  const habits = (data.habits?.defs || []).map(enrichHabit);
+  const [selectedId, setSelectedId] = useState(habits[0]?.id || '');
+  const selected = useMemo(() => habits.find((habit) => String(habit.id) === String(selectedId)) || habits[0], [habits, selectedId]);
+  const [recoveryNote, setRecoveryNote] = useState('');
+  if (!selected) return <div style={{ ...card, padding: 24 }}>Add a habit in Goal Garden before shaping its support plan.</div>;
+  const todayKey = `${dateContext.today}_${selected.id}`;
+  const completion = data.habits.logs[todayKey];
+  const addEvent = (previous, event) => previous.behaviorPreferences?.consent?.behaviorEvents ? [...(previous.behaviorEvents || []), event] : (previous.behaviorEvents || []);
+  const updateHabit = (patch) => setData((previous) => ({ ...previous, habits: { ...previous.habits, defs: previous.habits.defs.map((habit) => habit.id === selected.id ? enrichHabit({ ...habit, ...patch }) : habit) } }));
+  const complete = (level) => {
+    const now = new Date().toISOString();
+    setData((previous) => ({ ...previous, habits: { ...previous.habits, logs: { ...previous.habits.logs, [todayKey]: level } }, behaviorEvents: addEvent(previous, { id: `${now}-habit-${selected.id}`, type: 'habit_completed', occurredAt: now, entityType: 'habit', entityId: selected.id, metadata: { level } }) }));
+  };
+  const recover = () => {
+    const now = new Date().toISOString();
+    const recovery = { id: `${selected.id}-${Date.now()}`, habitId: selected.id, date: dateContext.today, note: recoveryNote.trim() || selected.recoveryPlan, createdAt: now };
+    setData((previous) => ({ ...previous, habitRecoveries: [recovery, ...(previous.habitRecoveries || [])], behaviorEvents: addEvent(previous, { id: `${now}-habit-recovery`, type: 'habit_recovered', occurredAt: now, entityType: 'habit', entityId: selected.id, metadata: {} }) }));
+    setRecoveryNote('');
+  };
+  const passiveAllowed = Boolean(data.behaviorPreferences?.consent?.passiveDetection);
+
+  return <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.45fr) 320px', gap: 12, alignItems: 'start' }}><div style={{ display: 'grid', gap: 12 }}><div style={card}><CardHeader icon="🌱" title="HABIT SUPPORT PLAN" color={C.teal} /><div style={{ padding: 13, display: 'grid', gap: 10 }}><div><Label>HABIT</Label><Select value={selected.id} onChange={(event) => setSelectedId(event.target.value)} options={habits.map((habit) => ({ v: habit.id, l: habit.name }))} /></div><div><Label>PERSONAL REASON</Label><Textarea value={selected.personalReason} onChange={(event) => updateHabit({ personalReason: event.target.value })} placeholder="Why does this matter to you?" /></div><div><Label>STABLE CUE</Label><Input value={selected.cue} onChange={(event) => updateHabit({ cue: event.target.value })} placeholder="After breakfast, at my desk, when I arrive home…" /></div><div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}><div><Label>MINIMUM</Label><Input value={selected.minimumVersion} onChange={(event) => updateHabit({ minimumVersion: event.target.value })} /></div><div><Label>NORMAL</Label><Input value={selected.normalVersion} onChange={(event) => updateHabit({ normalVersion: event.target.value })} /></div><div><Label>STRETCH</Label><Input value={selected.stretchVersion} onChange={(event) => updateHabit({ stretchVersion: event.target.value })} placeholder="Optional" /></div></div><div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}><div><Label>PREFERRED TIME</Label><Select value={selected.preferredTime} onChange={(event) => updateHabit({ preferredTime: event.target.value })} options={['morning', 'midday', 'evening', 'anytime']} /></div><div><Label>LOCATION</Label><Input value={selected.preferredLocation} onChange={(event) => updateHabit({ preferredLocation: event.target.value })} /></div></div><div><Label>RECOVERY PLAN</Label><Input value={selected.recoveryPlan} onChange={(event) => updateHabit({ recoveryPlan: event.target.value })} /></div><div><Label>PERCEIVED EFFORT · {selected.perceivedEffort}/5</Label><input aria-label="Perceived habit effort" type="range" min="1" max="5" value={selected.perceivedEffort} onChange={(event) => updateHabit({ perceivedEffort: Number(event.target.value) })} style={{ width: '100%' }} /></div><label style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 10, color: passiveAllowed ? C.dark : C.g3 }}><input type="checkbox" disabled={!passiveAllowed} checked={selected.passiveDetectionConsent} onChange={(event) => updateHabit({ passiveDetectionConsent: event.target.checked })} />Allow passive detection for this habit only</label>{!passiveAllowed && <div style={{ fontSize: 9, color: C.g3 }}>Enable global passive-detection consent in Settings before enabling it for an individual habit.</div>}</div></div></div><div style={{ display: 'grid', gap: 12 }}><div style={card}><CardHeader icon="✓" title="TODAY’S VERSION" color={C.green} /><div style={{ padding: 13, display: 'grid', gap: 8 }}>{completionLevels.map((level) => <Button key={level} onClick={() => complete(level)} color={completion === level ? C.green : C.teal} outline={completion !== level} full>{completionLabel(level)} · {selected[`${level}Version`] || 'Not configured'}</Button>)}<div style={{ color: C.g3, fontSize: 10, lineHeight: 1.5 }}>The minimum version is a complete success. Normal and stretch versions add intensity, not worth.</div></div></div><div style={card}><CardHeader icon="↺" title="RECOVERY AFTER A MISS" color={C.purple} /><div style={{ padding: 13, display: 'grid', gap: 8 }}><div style={{ fontSize: 10, color: C.g3 }}>{selected.recoveryPlan}</div><Input value={recoveryNote} onChange={(event) => setRecoveryNote(event.target.value)} placeholder="Optional note about restarting" /><Button onClick={recover} color={C.purple} full>Record a return, not a failure</Button></div></div></div></div>;
+}
