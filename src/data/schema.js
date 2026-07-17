@@ -83,7 +83,7 @@ export const personalDataSchema = z.object({
     id, title: z.string().min(1), desiredOutcome: z.string(), nextAction: z.string(), expectedMinutes: z.number().int().min(0).max(1440),
     actualMinutes: z.number().int().min(0).max(1440).nullable(), energy: z.enum(['low', 'medium', 'high']), priority: z.enum(['P1', 'P2', 'P3']),
     deadline: z.string(), scheduledStart: z.string(), scheduledEnd: z.string(), dependencies: z.array(id), context: z.string(),
-    status: z.enum(['inbox', 'planned', 'in_progress', 'completed', 'postponed', 'cancelled']), postponementCount: z.number().int().nonnegative(),
+    status: z.enum(['inbox', 'planned', 'in_progress', 'completed', 'postponed', 'cancelled']), startedAt: z.string().optional(), completedAt: z.string().optional(), postponementCount: z.number().int().nonnegative(),
     postponementReason: z.string(), goalId: id.nullable(), createdAt: z.string(), updatedAt: z.string(),
   })),
   behaviorEvents: z.array(z.object({ id, type: z.string(), occurredAt: z.string(), entityType: z.string(), entityId: id.nullable(), metadata: z.record(z.unknown()) })),

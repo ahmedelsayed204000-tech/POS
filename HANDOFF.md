@@ -132,6 +132,9 @@ Dashboard and Habits currently use their own full-page layouts instead of this s
 - Deterministic, editable next-action suggestions for common vague tasks such as presentations, study, exercise, and communication.
 - One-question postponement diagnosis with transparent matching guidance for unclear, oversized, blocked, low-energy, anxious, low-importance, conflicting, or unwanted work.
 - Task creation, completion, and postponement events are recorded only when behavior-event consent is enabled.
+- Tasks can be explicitly started and completed with actual duration; elapsed time is used when a start timestamp is available.
+- Estimate accuracy compares expected and actual duration without grading the user.
+- Duration guidance appears only after two comparable completed tasks and includes transition or recovery time.
 
 ### Finance and investing
 
