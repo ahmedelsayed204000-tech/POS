@@ -144,6 +144,14 @@ Dashboard and Habits currently use their own full-page layouts instead of this s
 - Every suggestion must be selected, edited if needed, saved as a draft, and explicitly confirmed before becoming active.
 - Users can remove plans at any time; plan creation and confirmation events respect behavior-event consent.
 
+### Flexible focus sessions
+
+- Focus sessions can be linked to an open task or started with a general objective.
+- Users choose duration and can pause, resume, extend by five minutes, finish, or use an emergency exit.
+- The focus state shows only the objective, smallest next action, visible timer, essential controls, and thought parking.
+- Completion reflection asks about useful progress, interruption, and whether the next session should be shorter, equal, or longer.
+- Focus start and end events are stored only with behavior-event consent.
+
 ### Finance and investing
 
 - Income and expense entry management.

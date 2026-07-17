@@ -87,7 +87,12 @@ export const personalDataSchema = z.object({
     postponementReason: z.string(), goalId: id.nullable(), createdAt: z.string(), updatedAt: z.string(),
   })),
   behaviorEvents: z.array(z.object({ id, type: z.string(), occurredAt: z.string(), entityType: z.string(), entityId: id.nullable(), metadata: z.record(z.unknown()) })),
-  focusSessions: z.array(z.unknown()),
+  focusSessions: z.array(z.object({
+    id, taskId: id.nullable(), objective: z.string(), nextAction: z.string(), plannedMinutes: z.number().int().min(5).max(180), elapsedSeconds: z.number().int().nonnegative(),
+    status: z.enum(['running', 'paused', 'completed', 'stopped']), startedAt: z.string(), endedAt: z.string().nullable(), pauseCount: z.number().int().nonnegative(),
+    thoughtParking: z.array(z.object({ id, text: z.string(), capturedAt: z.string() })),
+    reflection: z.object({ progress: z.enum(['yes', 'some', 'no']), interruption: z.string(), nextLength: z.enum(['shorter', 'equal', 'longer']) }).nullable(),
+  })),
   ifThenPlans: z.array(z.object({ id, type: z.enum(['action', 'coping']), cue: z.string().min(1), response: z.string().min(1), taskId: id.nullable(), status: z.enum(['draft', 'active', 'archived']), confirmedAt: z.string().nullable(), createdAt: z.string(), updatedAt: z.string() })),
   settings: z.object({ name: z.string(), weekTarget: z.number().finite().positive(), fitnessTarget: z.number().finite().positive(), currency: z.string().min(1), goalNetWorth: z.number().finite(), notionUrl: z.string() }),
 }).strict();
