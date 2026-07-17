@@ -136,6 +136,14 @@ Dashboard and Habits currently use their own full-page layouts instead of this s
 - Estimate accuracy compares expected and actual duration without grading the user.
 - Duration guidance appears only after two comparable completed tasks and includes transition or recovery time.
 
+### If–Then plans
+
+- Action plans connect a recognizable situation to a small chosen behavior.
+- Coping plans connect a likely obstacle to an alternative response.
+- Suggestions are derived from current high-priority or postponed tasks and preferred work start time.
+- Every suggestion must be selected, edited if needed, saved as a draft, and explicitly confirmed before becoming active.
+- Users can remove plans at any time; plan creation and confirmation events respect behavior-event consent.
+
 ### Finance and investing
 
 - Income and expense entry management.

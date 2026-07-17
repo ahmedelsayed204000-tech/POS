@@ -88,7 +88,7 @@ export const personalDataSchema = z.object({
   })),
   behaviorEvents: z.array(z.object({ id, type: z.string(), occurredAt: z.string(), entityType: z.string(), entityId: id.nullable(), metadata: z.record(z.unknown()) })),
   focusSessions: z.array(z.unknown()),
-  ifThenPlans: z.array(z.unknown()),
+  ifThenPlans: z.array(z.object({ id, type: z.enum(['action', 'coping']), cue: z.string().min(1), response: z.string().min(1), taskId: id.nullable(), status: z.enum(['draft', 'active', 'archived']), confirmedAt: z.string().nullable(), createdAt: z.string(), updatedAt: z.string() })),
   settings: z.object({ name: z.string(), weekTarget: z.number().finite().positive(), fitnessTarget: z.number().finite().positive(), currency: z.string().min(1), goalNetWorth: z.number().finite(), notionUrl: z.string() }),
 }).strict();
 

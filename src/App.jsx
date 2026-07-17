@@ -7,6 +7,7 @@ import GardenWorkspace from './components/layout/GardenWorkspace';
 import Dashboard from './components/pages/Dashboard';
 import DailyCommandCenter from './components/pages/DailyCommandCenter';
 import Tasks from './components/pages/Tasks';
+import IfThenPlans from './components/pages/IfThenPlans';
 import Habits from './components/pages/Habits';
 import TimeLog from './components/pages/TimeLog';
 import Finance from './components/pages/Finance';
@@ -97,7 +98,7 @@ export default function App() {
 
   const pageProps = { data, setData, navigate: setView, dateContext };
   const pages = {
-    dashboard: <Dashboard {...pageProps} />, compass: <DailyCommandCenter {...pageProps} />, tasks: <Tasks {...pageProps} />, habits: <Habits {...pageProps} />, timelog: <TimeLog {...pageProps} />,
+    dashboard: <Dashboard {...pageProps} />, compass: <DailyCommandCenter {...pageProps} />, tasks: <Tasks {...pageProps} />, plans: <IfThenPlans {...pageProps} />, habits: <Habits {...pageProps} />, timelog: <TimeLog {...pageProps} />,
     finance: <Finance {...pageProps} />, learning: <Learning {...pageProps} />, fitness: <Fitness {...pageProps} />,
     goals: <Goals {...pageProps} />, reports: <Reports data={data} dateContext={dateContext} />,
     notion: <Notion {...pageProps} />, books: <ReadingList {...pageProps} />, review: <WeeklyReview {...pageProps} />,
