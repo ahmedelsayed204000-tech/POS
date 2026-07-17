@@ -5,7 +5,7 @@ import './garden-workspace.css';
 const Icon = ({ children }) => <span className="material-symbols-rounded" aria-hidden="true">{children}</span>;
 
 const NAV_ITEMS = [
-  ['health', 'favorite', 'Health'], ['automations', 'bolt', 'Automations'], ['dashboard', 'home', 'Dashboard'], ['compass', 'explore', 'Daily Compass'],
+  ['health', 'favorite', 'Health'], ['automations', 'bolt', 'Automations'], ['dashboard', 'home', 'Dashboard'], ['compass', 'explore', 'Daily Compass'], ['tasks', 'checklist', 'Tasks'],
   ['habits', 'calendar_month', 'Habits'], ['timelog', 'schedule', 'Time Log'], ['finance', 'account_balance_wallet', 'Finance'],
   ['learning', 'menu_book', 'Learning'], ['fitness', 'fitness_center', 'Fitness'], ['sports', 'sports_soccer', 'Sports & Athlete'],
   ['workcareer', 'work', 'Work & Career'], ['goals', 'track_changes', 'Goals'], ['reports', 'monitoring', 'Reports'],
@@ -15,6 +15,7 @@ const NAV_ITEMS = [
 
 const WORKSPACES = {
   compass: { icon: 'explore', eyebrow: 'DAILY COMPASS', title: 'Choose a day you can actually finish.', subtitle: 'Turn your available time and energy into one primary outcome, a clear first action and a stopping point.', focus: 'Choose the smallest useful action that starts today’s most important outcome.', cta: 'Reflect on today’s plan' },
+  tasks: { icon: 'checklist', eyebrow: 'ACTION WORKSPACE', title: 'Make the next move unmistakably clear.', subtitle: 'Turn vague commitments into visible physical actions and respond to postponement without judgment.', focus: 'Choose one task and make its next action small enough to start now.', cta: 'Reflect on task friction' },
   health: { icon: 'favorite', eyebrow: 'BODY & RECOVERY', title: 'Grow energy you can rely on.', subtitle: 'Bring sleep, recovery, movement and wearable data into one calm daily picture.', focus: 'Protect tonight’s recovery window and notice what gives you energy.', cta: 'Log a health check-in' },
   automations: { icon: 'bolt', eyebrow: 'AUTOMATION GARDEN', title: 'Let the system remember for you.', subtitle: 'Shape reminders around your actual routine, quiet hours and preferred account.', focus: 'Connect one delivery channel and protect your quiet hours.', cta: 'Tune reminders' },
   timelog: { icon: 'schedule', eyebrow: 'TIME RHYTHM', title: 'Give your best hours a purpose.', subtitle: 'See where your time goes and keep space for work, recovery and growth.', focus: 'Protect one focused block before the day becomes reactive.', cta: 'Reflect on time' },
@@ -49,6 +50,7 @@ function workspaceStats(view, data, dateContext) {
 
   const map = {
     compass: [{ value: (data.dailyCompass || []).some((entry) => entry.date === today) ? 'Ready' : 'Open', label: 'today’s plan' }, { value: data.behaviorPreferences?.focusSessionMinutes || 25, label: 'preferred focus min' }, { value: (data.tasks || []).filter((task) => task.deadline === today && task.status !== 'completed').length, label: 'actions today' }],
+    tasks: [{ value: (data.tasks || []).filter((task) => !['completed', 'cancelled'].includes(task.status)).length, label: 'open tasks' }, { value: (data.tasks || []).filter((task) => task.status === 'postponed').length, label: 'need adjustment' }, { value: (data.tasks || []).filter((task) => task.status === 'completed').length, label: 'completed' }],
     health: [{ value: latestHealth.sleepMinutes ? `${(latestHealth.sleepMinutes / 60).toFixed(1)}h` : '—', label: 'latest sleep' }, { value: latestHealth.steps?.toLocaleString?.() || '—', label: 'latest steps' }, { value: latestHealth.recovery != null ? percent(latestHealth.recovery) : '—', label: 'recovery' }],
     automations: [{ value: data.automations?.enabled ? 'On' : 'Off', label: 'reminders' }, { value: data.automations?.morningTime || '08:00', label: 'morning plan' }, { value: data.automations?.provider || 'auto', label: 'delivery route' }],
     timelog: [{ value: `${sum((data.timeLog || []).filter((item) => item.date === today), (item) => item.hrs).toFixed(1)}h`, label: 'logged today' }, { value: (data.timeLog || []).filter((item) => item.date === today).length, label: 'time blocks' }, { value: `${data.settings?.weekTarget || 45}h`, label: 'weekly target' }],

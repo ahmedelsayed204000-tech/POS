@@ -126,6 +126,13 @@ Dashboard and Habits currently use their own full-page layouts instead of this s
 - Category breakdown chart.
 - Add and delete controls.
 
+### Tasks and postponement support
+
+- Typed task records with outcome, editable smallest next action, duration estimate, energy, priority, deadline, status, and postponement history.
+- Deterministic, editable next-action suggestions for common vague tasks such as presentations, study, exercise, and communication.
+- One-question postponement diagnosis with transparent matching guidance for unclear, oversized, blocked, low-energy, anxious, low-importance, conflicting, or unwanted work.
+- Task creation, completion, and postponement events are recorded only when behavior-event consent is enabled.
+
 ### Finance and investing
 
 - Income and expense entry management.
