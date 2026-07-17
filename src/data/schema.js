@@ -64,6 +64,19 @@ export const personalDataSchema = z.object({
   goalHistory: z.array(z.object({ date, goals: z.array(z.object({ id, pct: z.number().finite().min(0).max(100) })) })),
   investmentPlan: z.object({ profile: z.enum(['conservative', 'balanced', 'growth']), monthlyContribution: z.number().finite().nonnegative(), targets: z.record(z.number().finite().min(0).max(100)) }),
   automations: z.object({ provider: z.enum(['auto', 'google', 'microsoft']), email: z.string(), timezone: z.string(), morningTime: z.string(), eveningTime: z.string(), quietStart: z.string(), quietEnd: z.string(), enabled: z.boolean() }),
+  behaviorPreferences: z.object({
+    workingHoursStart: z.string(), workingHoursEnd: z.string(), wakeTime: z.string(), sleepTime: z.string(),
+    focusSessionMinutes: z.number().int().min(5).max(180), reminderFrequency: z.enum(['minimal', 'balanced', 'frequent']),
+    quietStart: z.string(), quietEnd: z.string(), workdays: z.array(z.number().int().min(0).max(6)), restDays: z.array(z.number().int().min(0).max(6)),
+    coachingTone: z.enum(['gentle', 'supportive', 'direct']), gamification: z.enum(['off', 'gentle', 'full']),
+    accessibility: z.object({ reducedMotion: z.boolean(), highContrast: z.boolean(), largeText: z.boolean() }),
+    consent: z.object({ behaviorEvents: z.boolean(), contextualRecommendations: z.boolean(), healthPersonalization: z.boolean(), passiveDetection: z.boolean() }),
+    disabledFeatures: z.array(z.string()),
+  }),
+  tasks: z.array(z.unknown()),
+  behaviorEvents: z.array(z.unknown()),
+  focusSessions: z.array(z.unknown()),
+  ifThenPlans: z.array(z.unknown()),
   settings: z.object({ name: z.string(), weekTarget: z.number().finite().positive(), fitnessTarget: z.number().finite().positive(), currency: z.string().min(1), goalNetWorth: z.number().finite(), notionUrl: z.string() }),
 }).strict();
 

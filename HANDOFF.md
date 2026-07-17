@@ -393,6 +393,9 @@ The July behavior-change and cosmic-visual-system brief is a future product road
 
 ### Foundations already available
 
+- Persisted behavior-support preferences for work hours, sleep/wake times, focus duration, reminder frequency, coaching tone, gamification, and accessibility.
+- Explicit opt-in consent controls for behavior events, contextual recommendations, health personalization, and passive detection; all default to off for new and migrated data.
+- Reserved task, behavior-event, focus-session, and If–Then-plan collections for staged implementation.
 - Daily plans and completion state.
 - Goals with next actions.
 - Habit completion history.
@@ -416,7 +419,7 @@ The July behavior-change and cosmic-visual-system brief is a future product road
 - Adaptive reminder decision engine and explanation UI.
 - Resilient-consistency analytics and identity evidence.
 - Behavior-based weekly recommendations.
-- Full privacy center, selective deletion, and behavioral export controls.
+- Full privacy center, selective deletion, and behavioral export controls beyond the new foundational consent settings.
 - Cosmic theme, Time Dimension, Time Gravity, constellations, habit orbits, or Memory Corridor.
 - Cognitive Load Mode, awareness exercises, or adaptive visual stimulation.
 

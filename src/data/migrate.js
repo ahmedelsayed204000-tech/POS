@@ -64,6 +64,18 @@ export const migrateData = (raw) => {
   data.goalHistory = data.goalHistory ?? [];
   data.investmentPlan = data.investmentPlan ?? { profile: 'balanced', monthlyContribution: 0, targets: { Cash: 20, Bonds: 25, Equity: 45, Alternatives: 10 } };
   data.automations = data.automations ?? { provider: 'auto', email: '', timezone: 'Africa/Cairo', morningTime: '08:00', eveningTime: '21:00', quietStart: '22:00', quietEnd: '07:00', enabled: false };
+  data.behaviorPreferences = {
+    ...DEF.behaviorPreferences, ...data.behaviorPreferences,
+    accessibility: { ...DEF.behaviorPreferences.accessibility, ...data.behaviorPreferences?.accessibility },
+    consent: { ...DEF.behaviorPreferences.consent, ...data.behaviorPreferences?.consent },
+    workdays: data.behaviorPreferences?.workdays ?? DEF.behaviorPreferences.workdays,
+    restDays: data.behaviorPreferences?.restDays ?? DEF.behaviorPreferences.restDays,
+    disabledFeatures: data.behaviorPreferences?.disabledFeatures ?? [],
+  };
+  data.tasks = data.tasks ?? [];
+  data.behaviorEvents = data.behaviorEvents ?? [];
+  data.focusSessions = data.focusSessions ?? [];
+  data.ifThenPlans = data.ifThenPlans ?? [];
   data.settings = { ...DEF.settings, ...data.settings };
   return data;
 };
