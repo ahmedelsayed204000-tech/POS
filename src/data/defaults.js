@@ -65,6 +65,7 @@ const DEF = {
     ],
   },
   dailyPlan: [],
+  dailyCompass: [],
   netWorthHistory: [],
   goalHistory: [],
   investmentPlan: { profile: 'balanced', monthlyContribution: 0, targets: { Cash: 20, Bonds: 25, Equity: 45, Alternatives: 10 } },

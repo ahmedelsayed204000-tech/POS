@@ -85,7 +85,7 @@ export default function Dashboard({ data, setData, navigate, dateContext }) {
   };
 
   const navItems = [
-    ['home', 'Today', 'dashboard'], ['route', 'Journey', 'goals'], ['routine', 'Habits', 'habits'],
+    ['home', 'Today', 'dashboard'], ['explore', 'Compass', 'compass'], ['route', 'Journey', 'goals'], ['routine', 'Habits', 'habits'],
     ['account_balance_wallet', 'Money', 'finance'], ['sports_soccer', 'Sports', 'sports'],
     ['work', 'Career', 'workcareer'], ['favorite', 'Coach', 'automations'],
   ];

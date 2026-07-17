@@ -32,6 +32,7 @@ test('adds behavior preferences with consent disabled for legacy data', () => {
   expect(Object.values(result.behaviorPreferences.consent).every((value) => value === false)).toBe(true);
   expect(result.tasks).toEqual([]);
   expect(result.behaviorEvents).toEqual([]);
+  expect(result.dailyCompass).toEqual([]);
 });
 
 test('preserves behavior choices while adding new consent defaults', () => {

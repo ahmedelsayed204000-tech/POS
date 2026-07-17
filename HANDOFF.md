@@ -114,9 +114,10 @@ Dashboard and Habits currently use their own full-page layouts instead of this s
 
 - `dailyPlan` records dated actions with completion state.
 - The dashboard reads and updates the current day's plan.
-- `DailyCommandCenter.jsx` provides a dedicated planning implementation and can draw suggested priorities from the latest weekly review.
-
-`DailyCommandCenter.jsx` is not currently registered in the main page map or navigation. The current daily-plan model is intentionally simple and is not yet the complete Daily Compass or task model.
+- Daily Compass asks for success criteria, one primary outcome, up to two secondary outcomes, likely friction, the smallest first action, energy, available time, stopping time, and a low-energy fallback.
+- It derives a first focus block and transition buffer from available capacity and the user's preferred focus duration.
+- Saving creates a typed P1 task and mirrors the selected outcomes into the existing dashboard plan.
+- Planning events are stored only when behavior-event consent is enabled.
 
 ### Time log
 

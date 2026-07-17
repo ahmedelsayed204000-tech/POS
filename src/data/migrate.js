@@ -60,6 +60,7 @@ export const migrateData = (raw) => {
     opportunities: data.workCareer?.opportunities ?? [],
   };
   data.dailyPlan = data.dailyPlan ?? [];
+  data.dailyCompass = data.dailyCompass ?? [];
   data.netWorthHistory = data.netWorthHistory ?? [];
   data.goalHistory = data.goalHistory ?? [];
   data.investmentPlan = data.investmentPlan ?? { profile: 'balanced', monthlyContribution: 0, targets: { Cash: 20, Bonds: 25, Equity: 45, Alternatives: 10 } };
