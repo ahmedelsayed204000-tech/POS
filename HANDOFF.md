@@ -96,7 +96,7 @@ Some recommendations are currently presentation rules rather than a complete ada
 - Daily garden progress and positive completion feedback.
 - Existing habit definitions and date-keyed completion logs are preserved underneath the garden experience.
 
-The current habit schema does not yet implement the full cue/minimum/normal/stretch/recovery model proposed for the behavior-support roadmap.
+The Habit Builder now enriches existing Goal Garden habits with a personal reason, stable cue, minimum/normal/stretch versions, preferred context, perceived effort, and recovery plan. Minimum completion is explicitly treated as valid success, while normal and stretch versions represent additional intensity. Legacy boolean completion history remains supported.
 
 ### Garden workspace and check-ins
 
@@ -114,9 +114,10 @@ Dashboard and Habits currently use their own full-page layouts instead of this s
 
 - `dailyPlan` records dated actions with completion state.
 - The dashboard reads and updates the current day's plan.
-- `DailyCommandCenter.jsx` provides a dedicated planning implementation and can draw suggested priorities from the latest weekly review.
-
-`DailyCommandCenter.jsx` is not currently registered in the main page map or navigation. The current daily-plan model is intentionally simple and is not yet the complete Daily Compass or task model.
+- Daily Compass asks for success criteria, one primary outcome, up to two secondary outcomes, likely friction, the smallest first action, energy, available time, stopping time, and a low-energy fallback.
+- It derives a first focus block and transition buffer from available capacity and the user's preferred focus duration.
+- Saving creates a typed P1 task and mirrors the selected outcomes into the existing dashboard plan.
+- Planning events are stored only when behavior-event consent is enabled.
 
 ### Time log
 
@@ -124,6 +125,32 @@ Dashboard and Habits currently use their own full-page layouts instead of this s
 - Weekly totals and target comparison.
 - Category breakdown chart.
 - Add and delete controls.
+
+### Tasks and postponement support
+
+- Typed task records with outcome, editable smallest next action, duration estimate, energy, priority, deadline, status, and postponement history.
+- Deterministic, editable next-action suggestions for common vague tasks such as presentations, study, exercise, and communication.
+- One-question postponement diagnosis with transparent matching guidance for unclear, oversized, blocked, low-energy, anxious, low-importance, conflicting, or unwanted work.
+- Task creation, completion, and postponement events are recorded only when behavior-event consent is enabled.
+- Tasks can be explicitly started and completed with actual duration; elapsed time is used when a start timestamp is available.
+- Estimate accuracy compares expected and actual duration without grading the user.
+- Duration guidance appears only after two comparable completed tasks and includes transition or recovery time.
+
+### If–Then plans
+
+- Action plans connect a recognizable situation to a small chosen behavior.
+- Coping plans connect a likely obstacle to an alternative response.
+- Suggestions are derived from current high-priority or postponed tasks and preferred work start time.
+- Every suggestion must be selected, edited if needed, saved as a draft, and explicitly confirmed before becoming active.
+- Users can remove plans at any time; plan creation and confirmation events respect behavior-event consent.
+
+### Flexible focus sessions
+
+- Focus sessions can be linked to an open task or started with a general objective.
+- Users choose duration and can pause, resume, extend by five minutes, finish, or use an emergency exit.
+- The focus state shows only the objective, smallest next action, visible timer, essential controls, and thought parking.
+- Completion reflection asks about useful progress, interruption, and whether the next session should be shorter, equal, or longer.
+- Focus start and end events are stored only with behavior-event consent.
 
 ### Finance and investing
 
@@ -393,6 +420,9 @@ The July behavior-change and cosmic-visual-system brief is a future product road
 
 ### Foundations already available
 
+- Persisted behavior-support preferences for work hours, sleep/wake times, focus duration, reminder frequency, coaching tone, gamification, and accessibility.
+- Explicit opt-in consent controls for behavior events, contextual recommendations, health personalization, and passive detection; all default to off for new and migrated data.
+- Reserved task, behavior-event, focus-session, and If–Then-plan collections for staged implementation.
 - Daily plans and completion state.
 - Goals with next actions.
 - Habit completion history.
@@ -416,7 +446,7 @@ The July behavior-change and cosmic-visual-system brief is a future product road
 - Adaptive reminder decision engine and explanation UI.
 - Resilient-consistency analytics and identity evidence.
 - Behavior-based weekly recommendations.
-- Full privacy center, selective deletion, and behavioral export controls.
+- Full privacy center, selective deletion, and behavioral export controls beyond the new foundational consent settings.
 - Cosmic theme, Time Dimension, Time Gravity, constellations, habit orbits, or Memory Corridor.
 - Cognitive Load Mode, awareness exercises, or adaptive visual stimulation.
 

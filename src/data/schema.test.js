@@ -17,3 +17,8 @@ test('accepts saved workspace focus and reflection data', () => {
   };
   expect(validateImport(JSON.stringify(data)).success).toBe(true);
 });
+
+test('requires explicit boolean behavior consent', () => {
+  const data = { ...DEF, behaviorPreferences: { ...DEF.behaviorPreferences, consent: { ...DEF.behaviorPreferences.consent, behaviorEvents: 'yes' } } };
+  expect(validateImport(JSON.stringify(data)).success).toBe(false);
+});

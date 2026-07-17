@@ -4,6 +4,7 @@ export const STORAGE_KEY = 'pos_final';
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
 import { fmt, NOW, YR, MO } from '../utils/dates';
+import { enrichHabit } from '../utils/habitSupport';
 const d = (daysAgo) => fmt(new Date(YR, MO, NOW.getDate() - daysAgo));
 const TODAY = fmt(NOW);
 const MP    = TODAY.slice(0, 7);   // "YYYY-MM"
@@ -65,10 +66,23 @@ const DEF = {
     ],
   },
   dailyPlan: [],
+  dailyCompass: [],
   netWorthHistory: [],
   goalHistory: [],
   investmentPlan: { profile: 'balanced', monthlyContribution: 0, targets: { Cash: 20, Bonds: 25, Equity: 45, Alternatives: 10 } },
   automations: { provider: 'auto', email: '', timezone: 'Africa/Cairo', morningTime: '08:00', eveningTime: '21:00', quietStart: '22:00', quietEnd: '07:00', enabled: false },
+  behaviorPreferences: {
+    workingHoursStart: '09:00', workingHoursEnd: '17:00', wakeTime: '07:00', sleepTime: '23:00',
+    focusSessionMinutes: 25, reminderFrequency: 'balanced', quietStart: '22:00', quietEnd: '07:00',
+    workdays: [1, 2, 3, 4, 5], restDays: [0, 6], coachingTone: 'supportive', gamification: 'gentle',
+    accessibility: { reducedMotion: false, highContrast: false, largeText: false },
+    consent: { behaviorEvents: false, contextualRecommendations: false, healthPersonalization: false, passiveDetection: false },
+    disabledFeatures: [],
+  },
+  tasks: [],
+  behaviorEvents: [],
+  focusSessions: [],
+  ifThenPlans: [],
   // ── HABITS ──────────────────────────────────────────────────────────────────
   habits: {
     defs: [
@@ -91,6 +105,7 @@ const DEF = {
     ],
     logs: {},
   },
+  habitRecoveries: [],
 
   // ── TIME LOG ─────────────────────────────────────────────────────────────────
   timeLog: [
@@ -269,5 +284,7 @@ const DEF = {
     notionUrl:     '',
   },
 };
+
+DEF.habits.defs = DEF.habits.defs.map(enrichHabit);
 
 export default DEF;

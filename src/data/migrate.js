@@ -1,4 +1,5 @@
 import DEF from './defaults';
+import { enrichHabit } from '../utils/habitSupport';
 
 export const LEGACY_KEYS = ['pos_v7', 'pos_v6', 'pos_v5', 'pos_v4', 'pos_v3'];
 
@@ -26,7 +27,8 @@ export const migrateData = (raw) => {
   data.finance = { ...DEF.finance, ...data.finance, assets: data.finance?.assets ?? [], liabilities: data.finance?.liabilities ?? [] };
   data.learn = { ...DEF.learn, ...data.learn, sessions: data.learn?.sessions ?? [] };
   data.fitness = { ...DEF.fitness, ...data.fitness, workouts: data.fitness?.workouts ?? [], weights: data.fitness?.weights ?? [] };
-  data.habits = { ...DEF.habits, ...data.habits, defs: data.habits?.defs ?? DEF.habits.defs, logs: data.habits?.logs ?? {} };
+  data.habits = { ...DEF.habits, ...data.habits, defs: (data.habits?.defs ?? DEF.habits.defs).map(enrichHabit), logs: data.habits?.logs ?? {} };
+  data.habitRecoveries = data.habitRecoveries ?? [];
   data.timeLog = data.timeLog ?? [];
   data.goals = data.goals ?? [];
   data.career = data.career ?? [];
@@ -60,10 +62,23 @@ export const migrateData = (raw) => {
     opportunities: data.workCareer?.opportunities ?? [],
   };
   data.dailyPlan = data.dailyPlan ?? [];
+  data.dailyCompass = data.dailyCompass ?? [];
   data.netWorthHistory = data.netWorthHistory ?? [];
   data.goalHistory = data.goalHistory ?? [];
   data.investmentPlan = data.investmentPlan ?? { profile: 'balanced', monthlyContribution: 0, targets: { Cash: 20, Bonds: 25, Equity: 45, Alternatives: 10 } };
   data.automations = data.automations ?? { provider: 'auto', email: '', timezone: 'Africa/Cairo', morningTime: '08:00', eveningTime: '21:00', quietStart: '22:00', quietEnd: '07:00', enabled: false };
+  data.behaviorPreferences = {
+    ...DEF.behaviorPreferences, ...data.behaviorPreferences,
+    accessibility: { ...DEF.behaviorPreferences.accessibility, ...data.behaviorPreferences?.accessibility },
+    consent: { ...DEF.behaviorPreferences.consent, ...data.behaviorPreferences?.consent },
+    workdays: data.behaviorPreferences?.workdays ?? DEF.behaviorPreferences.workdays,
+    restDays: data.behaviorPreferences?.restDays ?? DEF.behaviorPreferences.restDays,
+    disabledFeatures: data.behaviorPreferences?.disabledFeatures ?? [],
+  };
+  data.tasks = data.tasks ?? [];
+  data.behaviorEvents = data.behaviorEvents ?? [];
+  data.focusSessions = data.focusSessions ?? [];
+  data.ifThenPlans = data.ifThenPlans ?? [];
   data.settings = { ...DEF.settings, ...data.settings };
   return data;
 };

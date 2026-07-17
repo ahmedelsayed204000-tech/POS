@@ -25,3 +25,26 @@ test('adds workspace check-ins without changing restored preferences', () => {
   expect(result.settings.name).toBe('Restored user');
   expect(result.settings.currency).toBe('USD');
 });
+
+test('adds behavior preferences with consent disabled for legacy data', () => {
+  const result = migrateData({ settings: { name: 'Legacy user' } });
+  expect(result.behaviorPreferences.consent).toEqual(DEF.behaviorPreferences.consent);
+  expect(Object.values(result.behaviorPreferences.consent).every((value) => value === false)).toBe(true);
+  expect(result.tasks).toEqual([]);
+  expect(result.behaviorEvents).toEqual([]);
+  expect(result.dailyCompass).toEqual([]);
+});
+
+test('preserves behavior choices while adding new consent defaults', () => {
+  const result = migrateData({ behaviorPreferences: { coachingTone: 'direct', consent: { behaviorEvents: true } } });
+  expect(result.behaviorPreferences.coachingTone).toBe('direct');
+  expect(result.behaviorPreferences.consent.behaviorEvents).toBe(true);
+  expect(result.behaviorPreferences.consent.passiveDetection).toBe(false);
+});
+
+test('enriches legacy habits with a minimum version and recovery plan', () => {
+  const result = migrateData({ habits: { defs: [{ id: 9, cat: 'x', name: 'Walk', tgt: 4 }], logs: {} } });
+  expect(result.habits.defs[0].minimumVersion).toMatch(/two minutes/i);
+  expect(result.habits.defs[0].recoveryPlan).toMatch(/resume/i);
+  expect(result.habitRecoveries).toEqual([]);
+});
