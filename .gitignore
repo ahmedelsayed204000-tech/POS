@@ -1,0 +1,16 @@
+node_modules/
+node_modules-broken-*/
+.pnpm-store/
+.agents/
+.codex/
+build/
+dist/
+.env
+.env.local
+.env.*.local
+server/data/
+supabase-preinit/
+qa/
+PersonalOS-local.html
+.DS_Store
+Thumbs.db

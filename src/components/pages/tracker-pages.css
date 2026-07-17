@@ -1,0 +1,41 @@
+.tracker-page { color: #153b30; max-width: 1500px; margin: 0 auto; }
+.tracker-hero { background: #0d6547; color: #fff; border-radius: 18px; padding: 22px; border-left: 4px solid #d6a62f; box-shadow: 0 14px 35px rgba(13, 101, 71, .14); }
+.tracker-hero.work { background: #375f50; }
+.tracker-hero h1 { margin: 0; font-size: clamp(22px, 3vw, 34px); }
+.tracker-hero p { margin: 7px 0 0; color: rgba(255,255,255,.72); max-width: 720px; line-height: 1.5; }
+.tracker-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-top: 16px; }
+.tracker-kpi { background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.14); border-radius: 12px; padding: 12px; backdrop-filter: blur(8px); }
+.tracker-kpi strong { display: block; font-size: 22px; }
+.tracker-kpi span { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: rgba(255,255,255,.62); }
+.tracker-tabs { display: flex; gap: 6px; margin: 16px 0 10px; overflow-x: auto; padding-bottom: 3px; }
+.tracker-tabs button { border: 1px solid #d6ded7; background: #fffdf8; color: #63766c; border-radius: 999px; padding: 8px 15px; font-weight: 700; font-size: 12px; cursor: pointer; white-space: nowrap; }
+.tracker-tabs button.active { background: #0d6547; color: #fff; border-color: #0d6547; }
+.tracker-page.work-page .tracker-tabs button.active { background: #375f50; border-color: #375f50; }
+.tracker-grid { display: grid; grid-template-columns: minmax(260px, .72fr) minmax(0, 1.4fr); gap: 12px; }
+.tracker-card { background: #fffdf8; border: 1px solid #e0e4dc; border-radius: 14px; overflow: hidden; box-shadow: 0 5px 18px rgba(32, 65, 52, .05); }
+.tracker-card-head { padding: 13px 15px; border-bottom: 1px solid #e4e1d7; background: #f3f0e6; color: #153b30; font-size: 13px; font-weight: 800; display: flex; justify-content: space-between; align-items: center; }
+.tracker-card-body { padding: 14px; }
+.tracker-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+.tracker-field.full { grid-column: 1 / -1; }
+.tracker-field label { display: block; color: #63766c; font-size: 10px; font-weight: 800; margin-bottom: 4px; }
+.tracker-field input, .tracker-field select, .tracker-field textarea { width: 100%; border: 1px solid #d6ded7; border-radius: 8px; background: #fffdf8; color: #153b30; padding: 8px 9px; outline: none; font-size: 12px; }
+.tracker-field textarea { resize: vertical; min-height: 66px; }
+.tracker-field input:focus, .tracker-field select:focus, .tracker-field textarea:focus { border-color: #247c5a; box-shadow: 0 0 0 3px rgba(36,124,90,.1); }
+.tracker-actions { grid-column: 1 / -1; display: flex; gap: 8px; justify-content: flex-end; margin-top: 3px; }
+.tracker-primary, .tracker-secondary, .tracker-danger { border: 0; border-radius: 8px; padding: 8px 13px; font-size: 11px; font-weight: 800; cursor: pointer; }
+.tracker-primary { background: #0d6547; color: #fff; }
+.work-page .tracker-primary { background: #375f50; }
+.tracker-secondary { background: #f3f0e6; color: #3c5f52; }
+.tracker-danger { background: #f6e9e5; color: #9f554b; }
+.tracker-list { display: grid; gap: 8px; }
+.tracker-item { border: 1px solid #e4e1d7; border-radius: 10px; padding: 11px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: start; }
+.tracker-item h3 { margin: 0 0 3px; font-size: 13px; }
+.tracker-meta { display: flex; gap: 7px; flex-wrap: wrap; color: #63766c; font-size: 10px; }
+.tracker-note { color: #52685d; font-size: 11px; margin-top: 6px; line-height: 1.4; }
+.tracker-pill { display: inline-flex; padding: 3px 7px; border-radius: 999px; background: #e7f0eb; color: #247c5a; font-size: 9px; font-weight: 800; text-transform: capitalize; }
+.work-page .tracker-pill { background: #eef0e5; color: #5f6b4e; }
+.tracker-empty { text-align: center; color: #829087; padding: 28px 10px; font-size: 12px; }
+.tracker-progress { height: 6px; background: #e4e1d7; border-radius: 99px; overflow: hidden; margin-top: 8px; }
+.tracker-progress > div { height: 100%; background: #247c5a; border-radius: inherit; }
+@media (max-width: 900px) { .tracker-kpis { grid-template-columns: repeat(2, minmax(0,1fr)); } .tracker-grid { grid-template-columns: 1fr; } }
+@media (max-width: 560px) { .tracker-hero { border-radius: 13px; padding: 17px; } .tracker-kpis { gap: 7px; } .tracker-kpi { padding: 10px; } .tracker-kpi strong { font-size: 18px; } .tracker-form { grid-template-columns: 1fr; } .tracker-field.full, .tracker-actions { grid-column: 1; } .tracker-item { grid-template-columns: 1fr; } }
