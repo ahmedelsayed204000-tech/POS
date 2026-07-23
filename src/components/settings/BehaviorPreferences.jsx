@@ -1,6 +1,7 @@
 import React from 'react';
 import C from '../../constants/theme';
 import DEF from '../../data/defaults';
+import { applyAutomationConsentPatch } from '../../utils/consentGuards';
 import { CardHeader, Input, Label, Select } from '../ui';
 
 const card = { background: '#fff', borderRadius: 12, boxShadow: '0 1px 6px rgba(0,0,0,.07)', overflow: 'hidden' };
@@ -9,8 +10,12 @@ const toggle = { display: 'flex', justifyContent: 'space-between', gap: 12, alig
 export default function BehaviorPreferences({ data, setData }) {
   const preferences = data.behaviorPreferences || DEF.behaviorPreferences;
   const update = (patch) => setData((previous) => ({ ...previous, behaviorPreferences: { ...preferences, ...patch } }));
-  const updateNested = (key, patch) => update({ [key]: { ...preferences[key], ...patch } });
-  const consentChoices = [['behaviorEvents', 'Store behavior events for your reports'], ['contextualRecommendations', 'Use your history for recommendations'], ['healthPersonalization', 'Use connected health data for planning'], ['passiveDetection', 'Allow explicitly connected passive detection']];
+  const updateNested = (key, patch) => setData((previous) => ({
+    ...previous,
+    behaviorPreferences: { ...preferences, [key]: { ...preferences[key], ...patch } },
+    automations: key === 'consent' ? applyAutomationConsentPatch(previous.automations, patch) : previous.automations,
+  }));
+  const consentChoices = [['behaviorEvents', 'Store behavior events for your reports'], ['contextualRecommendations', 'Use your history for recommendations'], ['healthPersonalization', 'Use connected health data for planning'], ['passiveDetection', 'Allow explicitly connected passive detection'], ['emailDelivery', 'Send account, setup, and profile emails'], ['reminders', 'Send planned reminder notifications']];
 
   return <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
     <div style={card}><CardHeader icon="🧭" title="WORK & SUPPORT PREFERENCES" color={C.purple} /><div style={{ padding: 13, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 9 }}>

@@ -6,6 +6,12 @@ export const LEGACY_KEYS = ['pos_v7', 'pos_v6', 'pos_v5', 'pos_v4', 'pos_v3'];
 export const migrateData = (raw) => {
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
   const data = { ...DEF, ...raw };
+  data.personalization = {
+    ...DEF.personalization,
+    ...raw.personalization,
+    activeDimensions: raw.personalization?.activeDimensions ?? DEF.personalization.activeDimensions,
+    scoreWeights: { ...DEF.personalization.scoreWeights, ...raw.personalization?.scoreWeights },
+  };
 
   if (raw.tl && !raw.timeLog) {
     data.timeLog = data.tl;
@@ -34,7 +40,10 @@ export const migrateData = (raw) => {
   data.career = data.career ?? [];
   data.books = data.books ?? [];
   data.notes = data.notes ?? [];
-  data.weeklyReviews = data.weeklyReviews ?? [];
+  data.weeklyReviews = (data.weeklyReviews ?? []).map((review) => ({
+    ...review,
+    date: review.date || review.savedAt?.slice(0, 10) || '',
+  }));
   data.scoreLog = data.scoreLog ?? [];
   data.health = { records: data.health?.records ?? [] };
   data.workspacePulse = data.workspacePulse ?? {};

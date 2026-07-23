@@ -11,6 +11,17 @@ export async function savePersonalData(userId, data) {
   return { data: documentResult.data, error: domainError };
 }
 
+export async function saveUserProfile(user, data) {
+  if (!user?.id) return { error: new Error('A signed-in user is required.') };
+  return supabase.from('profiles').upsert({
+    id: user.id,
+    email: user.email || null,
+    display_name: data.settings?.name || user.user_metadata?.full_name || '',
+    timezone: data.automations?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
+    updated_at: new Date().toISOString(),
+  });
+}
+
 async function mirrorDomainTables(userId, data) {
   const sports = data.sports || {};
   const work = data.workCareer || {};

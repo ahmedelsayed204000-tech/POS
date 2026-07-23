@@ -6,3 +6,10 @@
 .goal-garden-shell.panel-open + .account-sync{display:none}
 @media(max-width:1120px){.goal-garden-shell.panel-open .gg-main{padding-right:32px}.gg-panel{width:min(410px,94vw)}.gg-focus-grid{grid-template-columns:240px 1fr}.gg-plant-visual{min-height:330px}}
 @media(max-width:760px){.goal-garden-shell{display:block;padding-bottom:60px}.gg-sidebar{position:fixed;top:auto;bottom:0;left:0;right:0;width:100%;height:60px;min-height:0;padding:5px;background:#063d2e;display:block}.gg-brand,.gg-profile{display:none}.gg-sidebar nav{display:flex;overflow-x:auto;height:100%;gap:2px}.gg-sidebar nav button{min-width:58px;justify-content:center;padding:5px}.gg-sidebar nav button>span:not(.material-symbols-rounded){display:none}.gg-main,.goal-garden-shell.panel-open .gg-main{padding:16px 13px}.gg-top>button{font-size:0;padding:8px}.gg-top>button .material-symbols-rounded{font-size:20px}.gg-plants{justify-content:flex-start}.gg-focus-grid{grid-template-columns:1fr}.gg-plant-story{text-align:center}.gg-plant-story>p,.gg-stat,.gg-milestone{margin-left:auto;margin-right:auto}.gg-plant-visual{min-height:300px}.gg-action-cards{grid-template-columns:1fr}.gg-week{grid-template-columns:65px repeat(7,1fr);overflow-x:auto}.gg-week>small{display:none}.gg-panel{bottom:0;top:auto;height:92dvh;border-radius:18px 18px 0 0}.gg-panel-head{padding-top:17px}.account-sync{right:10px!important;bottom:68px!important}}
+@media(max-width:760px){
+  .goal-garden-shell{--gg-mobile-nav-height:66px;padding-bottom:calc(var(--gg-mobile-nav-height) + env(safe-area-inset-bottom,0px))}
+  .gg-sidebar{height:calc(var(--gg-mobile-nav-height) + env(safe-area-inset-bottom,0px));padding:5px 8px calc(5px + env(safe-area-inset-bottom,0px))}
+  .gg-sidebar nav{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));overflow:hidden;gap:0}
+  .gg-sidebar nav button{min-width:0;width:100%;overflow:hidden}
+  .gg-main,.goal-garden-shell.panel-open .gg-main{padding-bottom:calc(var(--gg-mobile-nav-height) + 26px + env(safe-area-inset-bottom,0px))}
+}

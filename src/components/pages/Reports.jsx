@@ -1,7 +1,8 @@
 import React, { useMemo } from 'react';
 import C from '../../constants/theme';
 import { Bar, CardHeader } from '../ui';
-import { lifeScore, netWorth, scoreFinance, scoreFitness, scoreGoals, scoreHabits, scoreLearn, scoreTime, studyStreak } from '../../utils/scores';
+import { netWorth, scoreFinance, scoreFitness, scoreGoals, scoreHabits, scoreLearn, scoreTime, studyStreak } from '../../utils/scores';
+import { personalScore } from '../../utils/personalScore';
 import { fmt } from '../../utils/dates';
 
 const card = { background: '#fff', borderRadius: 12, boxShadow: '0 1px 6px rgba(0,0,0,.07)', overflow: 'hidden' };
@@ -14,10 +15,11 @@ export default function Reports({ data, dateContext }) {
   ];
   const studyDays = useMemo(() => Array.from({ length: 7 }, (_, i) => { const date = fmt(new Date(NOW.getFullYear(), NOW.getMonth(), NOW.getDate() - (6 - i))); const minutes = (data.learn?.sessions || []).filter((session) => session.date === date).reduce((sum, session) => sum + Number(session.min || 0), 0); return { date: date.slice(5), minutes }; }), [data.learn]);
   const maxMinutes = Math.max(1, ...studyDays.map((day) => day.minutes));
-  const scoreHistory = [...(data.scoreLog || []), { date: TODAY, score: Number(lifeScore(data).toFixed(1)) }].slice(-21);
+  const currentLifeScore = personalScore(data, dateContext).score;
+  const scoreHistory = [...(data.scoreLog || []).filter((entry) => entry.date !== TODAY), { date: TODAY, score: Number(currentLifeScore.toFixed(1)) }].slice(-21);
   const bestHabit = [...(data.habits?.defs || [])].map((habit) => { const done = Object.keys(data.habits?.logs || {}).filter((key) => key.endsWith(`_${habit.id}`)).length; return { ...habit, pct: Math.min(100, done / Math.max(1, NOW.getDate()) * 100) }; }).sort((a, b) => b.pct - a.pct).slice(0, 7);
   const money = (value) => `${Number(value || 0).toLocaleString()} ${settings.currency || 'EGP'}`;
-  const stats = [['Life score', `${lifeScore(data).toFixed(1)}/10`, C.gold], ['Net worth', money(netWorth(data.finance)), C.green], ['Study streak', `${studyStreak(data.learn?.sessions || [])} days`, C.purple], ['Books read', `${(data.books || []).filter((book) => book.status === 'Done').length}`, C.book]];
+  const stats = [['Life score', `${currentLifeScore.toFixed(1)}/10`, C.gold], ['Net worth', money(netWorth(data.finance)), C.green], ['Study streak', `${studyStreak(data.learn?.sessions || [])} days`, C.purple], ['Books read', `${(data.books || []).filter((book) => book.status === 'Done').length}`, C.book]];
 
   return <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 10 }}>{stats.map(([label, value, color]) => <div key={label} style={{ background: '#fff', borderTop: `3px solid ${color}`, borderRadius: 10, padding: 11, textAlign: 'center', boxShadow: '0 1px 4px rgba(0,0,0,.07)' }}><div style={{ fontSize: 16, fontWeight: 800, color }}>{value}</div><div style={{ fontSize: 9, fontWeight: 700, color: C.g3 }}>{label}</div></div>)}</div>

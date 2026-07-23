@@ -5,6 +5,13 @@ const id = z.union([z.number(), z.string()]);
 const moneyEntry = z.object({ id, date, amt: z.number().finite() });
 
 export const personalDataSchema = z.object({
+  personalization: z.object({
+    completed: z.boolean(), updatedAt: z.string().nullable(), primaryPriority: z.string(),
+    activeDimensions: z.array(z.enum(['growth','wellbeing','relationships','resources','meaning','learning'])).min(1),
+    scoreWeights: z.record(z.number().finite().min(0).max(100)),
+    habitStyle: z.enum(['gentle','balanced','structured']), capacity: z.enum(['light','moderate','full']),
+    coachingTone: z.enum(['gentle','supportive','direct']), successDefinition: z.string(),
+  }),
   health: z.object({ records: z.array(z.object({ date, source: z.string(), steps: z.number().finite().optional(), sleepMinutes: z.number().finite().nonnegative().optional(), sleepScore: z.number().finite().optional(), restingHeartRate: z.number().finite().optional(), hrv: z.number().finite().optional(), weightKg: z.number().finite().positive().optional(), calories: z.number().finite().nonnegative().optional(), recovery: z.number().finite().min(0).max(100).optional(), workoutMinutes: z.number().finite().nonnegative().optional(), updatedAt: z.string().optional() })) }).optional(),
   workspacePulse: z.record(z.object({
     customFocus: z.string().optional(),
@@ -57,7 +64,7 @@ export const personalDataSchema = z.object({
   career: z.array(z.object({ id, company: z.string(), role: z.string(), date, status: z.string(), notes: z.string(), priority: z.string() })),
   books: z.array(z.object({ id, title: z.string(), author: z.string(), genre: z.string(), status: z.enum(['Want', 'Reading', 'Done']), rating: z.number().int().min(0).max(5), note: z.string(), finished: z.string() })),
   notes: z.array(z.object({ id, date, text: z.string(), time: z.string() })),
-  weeklyReviews: z.array(z.object({ id, week: z.string(), wins: z.string(), challenges: z.string(), lessons: z.string(), p1: z.string(), p2: z.string(), p3: z.string(), satisfaction: z.union([z.string(), z.number()]), savedAt: z.string().optional(), autoScore: z.number().optional(), scores: z.record(z.number()).optional() })),
+  weeklyReviews: z.array(z.object({ id, week: z.string(), date, wins: z.string(), challenges: z.string(), lessons: z.string(), p1: z.string(), p2: z.string(), p3: z.string(), satisfaction: z.union([z.string(), z.number()]), savedAt: z.string().optional(), autoScore: z.number().optional(), scores: z.record(z.number()).optional() })),
   aiHistory: z.array(z.unknown()),
   scoreLog: z.array(z.object({ date, score: z.number().finite().min(0).max(10) })),
   dailyPlan: z.array(z.object({ id, date, text: z.string(), done: z.boolean(), source: z.string().optional() })),
@@ -77,7 +84,7 @@ export const personalDataSchema = z.object({
     quietStart: z.string(), quietEnd: z.string(), workdays: z.array(z.number().int().min(0).max(6)), restDays: z.array(z.number().int().min(0).max(6)),
     coachingTone: z.enum(['gentle', 'supportive', 'direct']), gamification: z.enum(['off', 'gentle', 'full']),
     accessibility: z.object({ reducedMotion: z.boolean(), highContrast: z.boolean(), largeText: z.boolean() }),
-    consent: z.object({ behaviorEvents: z.boolean(), contextualRecommendations: z.boolean(), healthPersonalization: z.boolean(), passiveDetection: z.boolean() }),
+    consent: z.object({ behaviorEvents: z.boolean(), contextualRecommendations: z.boolean(), healthPersonalization: z.boolean(), passiveDetection: z.boolean(), emailDelivery: z.boolean(), reminders: z.boolean() }),
     disabledFeatures: z.array(z.string()),
   }),
   tasks: z.array(z.object({

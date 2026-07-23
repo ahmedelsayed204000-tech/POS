@@ -1,11 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { lifeScore, netWorth } from '../../utils/scores';
+import { netWorth } from '../../utils/scores';
+import { personalScore } from '../../utils/personalScore';
 import './garden-workspace.css';
 
 const Icon = ({ children }) => <span className="material-symbols-rounded" aria-hidden="true">{children}</span>;
 
 const NAV_ITEMS = [
-  ['health', 'favorite', 'Health'], ['automations', 'bolt', 'Automations'], ['dashboard', 'home', 'Dashboard'], ['compass', 'explore', 'Daily Compass'], ['tasks', 'checklist', 'Tasks'], ['plans', 'alt_route', 'If–Then Plans'], ['focus', 'timer', 'Focus'],
+  ['health', 'favorite', 'Health'], ['automations', 'bolt', 'Automations'], ['dashboard', 'home', 'Today'], ['compass', 'explore', 'Daily Compass'], ['tasks', 'checklist', 'Tasks'], ['plans', 'alt_route', 'If–Then Plans'], ['focus', 'timer', 'Focus'],
   ['habits', 'calendar_month', 'Habits'], ['habitbuilder', 'psychiatry', 'Habit Builder'], ['timelog', 'schedule', 'Time Log'], ['finance', 'account_balance_wallet', 'Finance'],
   ['learning', 'menu_book', 'Learning'], ['fitness', 'fitness_center', 'Fitness'], ['sports', 'sports_soccer', 'Sports & Athlete'],
   ['workcareer', 'work', 'Work & Career'], ['goals', 'track_changes', 'Goals'], ['reports', 'monitoring', 'Reports'],
@@ -18,6 +19,7 @@ const WORKSPACES = {
   tasks: { icon: 'checklist', eyebrow: 'ACTION WORKSPACE', title: 'Make the next move unmistakably clear.', subtitle: 'Turn vague commitments into visible physical actions and respond to postponement without judgment.', focus: 'Choose one task and make its next action small enough to start now.', cta: 'Reflect on task friction' },
   plans: { icon: 'alt_route', eyebrow: 'IF–THEN PLANS', title: 'Choose your response before friction arrives.', subtitle: 'Connect a recognizable situation or obstacle to one small behavior you explicitly choose.', focus: 'Create one plan for the obstacle most likely to interrupt today’s priority.', cta: 'Reflect on a chosen response' },
   focus: { icon: 'timer', eyebrow: 'FOCUSED WORK', title: 'Stay with one useful action.', subtitle: 'Protect one chosen objective, park unrelated thoughts and stop or extend without penalty.', focus: 'Work only on the visible next action for the duration you selected.', cta: 'Reflect on this focus block' },
+  habits: { icon: 'routine', eyebrow: 'HABIT RHYTHM', title: 'Grow through actions you can repeat.', subtitle: 'Keep your North Star, habit actions and weekly rhythm in one calm workspace.', focus: 'Complete the smallest valid version of one habit today.', cta: 'Shape today’s habits' },
   habitbuilder: { icon: 'psychiatry', eyebrow: 'HABIT BUILDER', title: 'Make consistency easier than intensity.', subtitle: 'Connect each habit to a stable cue, a valid minimum version and a compassionate recovery plan.', focus: 'Complete the minimum version at the next recognizable cue.', cta: 'Reflect on habit effort' },
   health: { icon: 'favorite', eyebrow: 'BODY & RECOVERY', title: 'Grow energy you can rely on.', subtitle: 'Bring sleep, recovery, movement and wearable data into one calm daily picture.', focus: 'Protect tonight’s recovery window and notice what gives you energy.', cta: 'Log a health check-in' },
   automations: { icon: 'bolt', eyebrow: 'AUTOMATION GARDEN', title: 'Let the system remember for you.', subtitle: 'Shape reminders around your actual routine, quiet hours and preferred account.', focus: 'Connect one delivery channel and protect your quiet hours.', cta: 'Tune reminders' },
@@ -49,6 +51,7 @@ function workspaceStats(view, data, dateContext) {
   const learningTopics = ['sql', 'pbi', 'stats', 'mba'].flatMap((key) => data.learn?.[key] || []);
   const goals = data.goals || [];
   const pulseCount = (data.workspacePulse?.[view]?.checkIns || []).length;
+  const refinedLifeScore = personalScore(data, dateContext).score;
   const common = [{ value: pulseCount, label: 'personal check-ins' }];
 
   const map = {
@@ -66,16 +69,16 @@ function workspaceStats(view, data, dateContext) {
     sports: [{ value: `${(data.sports?.sessions || []).length}/${data.sports?.profile?.weeklyTarget || 4}`, label: 'session rhythm' }, { value: `${sum((data.sports?.nutrition || []).filter((item) => item.date === today), (item) => item.protein)}g`, label: 'protein today' }, { value: `${(sum((data.sports?.nutrition || []).filter((item) => item.date === today), (item) => item.waterMl) / 1000).toFixed(1)}L`, label: 'water today' }],
     workcareer: [{ value: (data.workCareer?.shifts || []).filter((item) => item.date === today).length, label: 'shifts today' }, { value: (data.workCareer?.development || []).filter((item) => item.status === 'active').length, label: 'active studies' }, { value: (data.workCareer?.opportunities || []).filter((item) => !['accepted', 'rejected', 'withdrawn'].includes(item.status)).length, label: 'open opportunities' }],
     goals: [{ value: percent(goals.length ? sum(goals, (goal) => goal.pct) / goals.length : 0), label: 'average progress' }, { value: goals.filter((goal) => goal.pri === 'P1').length, label: 'P1 goals' }, { value: goals.filter((goal) => goal.pct >= 50).length, label: 'past halfway' }],
-    reports: [{ value: lifeScore(data).toFixed(1), label: 'life score' }, { value: (data.scoreLog || []).length, label: 'daily snapshots' }, { value: (data.goalHistory || []).length, label: 'goal snapshots' }],
+    reports: [{ value: refinedLifeScore.toFixed(1), label: 'life score' }, { value: (data.scoreLog || []).length, label: 'daily snapshots' }, { value: (data.goalHistory || []).length, label: 'goal snapshots' }],
     notion: [{ value: data.settings?.notionUrl ? 'Linked' : 'Local', label: 'Notion status' }, { value: (data.dailyPlan || []).length, label: 'planned actions' }, { value: (data.notes || []).length, label: 'captured notes' }],
     books: [{ value: (data.books || []).filter((book) => book.status === 'Done').length, label: 'books finished' }, { value: (data.books || []).filter((book) => book.status === 'Reading').length, label: 'reading now' }, { value: percent((data.books || []).filter((book) => book.status === 'Done').length / 24 * 100), label: 'annual goal' }],
-    review: [{ value: (data.weeklyReviews || []).length, label: 'reviews saved' }, { value: data.weeklyReviews?.at?.(-1)?.satisfaction || '—', label: 'last satisfaction' }, { value: lifeScore(data).toFixed(1), label: 'current life score' }],
+    review: [{ value: (data.weeklyReviews || []).length, label: 'reviews saved' }, { value: data.weeklyReviews?.at?.(-1)?.satisfaction || '—', label: 'last satisfaction' }, { value: refinedLifeScore.toFixed(1), label: 'current life score' }],
     settings: [{ value: data.settings?.currency || 'EGP', label: 'currency' }, { value: `${data.settings?.weekTarget || 45}h`, label: 'weekly target' }, { value: data.settings?.fitnessTarget || 5, label: 'fitness target' }],
   };
   return [...(map[view] || []), ...common].slice(0, 3);
 }
 
-export default function GardenWorkspace({ view, data, setData, navigate, dateContext, children }) {
+export default function GardenWorkspace({ view, data, setData, navigate, dateContext, children, embedded = false }) {
   const meta = WORKSPACES[view] || WORKSPACES.goals;
   const pulse = data.workspacePulse?.[view] || {};
   const [panelOpen, setPanelOpen] = useState(false);
@@ -106,15 +109,18 @@ export default function GardenWorkspace({ view, data, setData, navigate, dateCon
     setPanelOpen(false);
   };
 
-  return <div className={`garden-workspace${panelOpen ? ' checkin-open' : ''}`} data-workspace={view}>
-    <aside className="garden-nav">
-      <button className="garden-brand" onClick={() => navigate('dashboard')}><span><Icon>psychiatry</Icon></span><div><b>PERSONAL OS</b><small>Life Garden</small></div></button>
-      <nav aria-label="PersonalOS workspaces">{NAV_ITEMS.map(([itemView, icon, label]) => <button key={itemView} className={view === itemView ? 'active' : ''} onClick={() => navigate(itemView)} title={label}><Icon>{icon}</Icon><span>{label}</span></button>)}</nav>
+  return <div className={`garden-workspace${embedded ? ' embedded' : ''}${panelOpen ? ' checkin-open' : ''}`} data-workspace={view}>
+    {!embedded && <aside className="garden-nav">
+      <button className="garden-brand" onClick={() => navigate('dashboard')} aria-label="Open Today home"><span><Icon>psychiatry</Icon></span><div><b>PERSONAL OS</b><small>Life Garden</small></div></button>
+      <nav aria-label="PersonalOS workspaces">{NAV_ITEMS.map(([itemView, icon, label]) => {
+        const active = view === itemView;
+        return <button key={itemView} className={active ? 'active' : ''} onClick={() => navigate(itemView)} title={label} aria-current={active ? 'page' : undefined} aria-label={`Open ${label}`}><Icon>{icon}</Icon><span>{label}</span></button>;
+      })}</nav>
       <div className="garden-profile"><span>{(data.settings?.name || 'Y')[0]}</span><div><b>{data.settings?.name || 'You'}</b><small>Your system is growing</small></div></div>
-    </aside>
+    </aside>}
 
     <main className="garden-workspace-main">
-      <header className="garden-topbar"><div><Icon>light_mode</Icon><span><b>{dateContext.now.toLocaleDateString('en', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</b><small>One clear step at a time.</small></span></div><button onClick={() => setPanelOpen(true)}><Icon>tune</Icon>Shape this space</button></header>
+      {!embedded && <header className="garden-topbar"><div><Icon>light_mode</Icon><span><b>{dateContext.now.toLocaleDateString('en', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</b><small>One clear step at a time.</small></span></div><button onClick={() => setPanelOpen(true)} aria-label="Open workspace check-in"><Icon>tune</Icon>Shape this space</button></header>}
 
       <section className="garden-hero">
         <div className="garden-hero-copy"><small>{meta.eyebrow}</small><h1>{meta.title}</h1><p>{meta.subtitle}</p><div className="garden-focus"><span><Icon>{todayDone ? 'check_circle' : meta.icon}</Icon></span><div><small>TODAY’S FOCUS</small><b>{pulse.customFocus || meta.focus}</b></div></div></div>
@@ -123,21 +129,20 @@ export default function GardenWorkspace({ view, data, setData, navigate, dateCon
       </section>
 
       <section className="garden-actions" aria-label="Workspace quick actions">
-        <button className={todayDone ? 'done' : ''} onClick={toggleFocus}><span><Icon>{todayDone ? 'check' : 'task_alt'}</Icon></span><div><b>{todayDone ? 'Focus completed' : 'Complete today’s focus'}</b><small>{todayDone ? 'A meaningful step is recorded.' : 'One tap when the important step is done.'}</small></div></button>
-        <button onClick={() => setPanelOpen(true)}><span><Icon>edit_note</Icon></span><div><b>{meta.cta}</b><small>Adjust the focus, energy and reflection.</small></div></button>
-        <button onClick={() => navigate('goals')}><span><Icon>track_changes</Icon></span><div><b>Connect to a goal</b><small>Keep the bigger reason visible.</small></div></button>
+        <button className={todayDone ? 'done' : ''} onClick={toggleFocus} aria-pressed={todayDone} aria-label={todayDone ? 'Mark today focus incomplete' : 'Mark today focus complete'}><span><Icon>{todayDone ? 'check' : 'task_alt'}</Icon></span><div><b>{todayDone ? 'Focus completed' : 'Complete today’s focus'}</b><small>{todayDone ? 'A meaningful step is recorded.' : 'One tap when the important step is done.'}</small></div></button>
+        <button onClick={() => setPanelOpen(true)} aria-label={`Open reflection for ${meta.eyebrow}`}><span><Icon>edit_note</Icon></span><div><b>{meta.cta}</b><small>Adjust focus and reflection for this workspace.</small></div></button>
         {latestCheckIn && <div className="garden-latest"><Icon>eco</Icon><span><small>LATEST CHECK-IN · ENERGY {latestCheckIn.energy}/5</small><b>{latestCheckIn.note}</b></span></div>}
       </section>
 
       <section className="garden-detail">
-        <div className="garden-detail-head"><div><small>WORKSPACE DETAILS</small><h2>Everything you need, when you need it.</h2></div><span>Use the quick layer above daily. Open the details below when you need depth.</span></div>
+        <div className="garden-detail-head"><div><small>DETAILS</small><h2>{meta.eyebrow.toLowerCase().replace(/\b\w/g, (letter) => letter.toUpperCase())}</h2></div><span>Open deeper tools only when you need them.</span></div>
         <div className="garden-content">{children}</div>
       </section>
     </main>
 
     {panelOpen && <aside className="garden-checkin" aria-label="Workspace check-in panel">
       <div className="garden-checkin-head"><div><small>{meta.eyebrow}</small><h2>Shape this space</h2><p>Keep it personal, light and useful.</p></div><button onClick={() => setPanelOpen(false)} aria-label="Close workspace check-in"><Icon>close</Icon></button></div>
-      <div className="garden-checkin-body"><label>Today’s focus<textarea value={focusDraft} onChange={(event) => setFocusDraft(event.target.value)} /></label><div><span>How is your energy?</span><div className="garden-energy">{[1,2,3,4,5].map((level) => <button key={level} className={energy === level ? 'active' : ''} onClick={() => setEnergy(level)} aria-label={`Energy ${level} of 5`}>{level}</button>)}</div></div><label>Reflection or win<textarea value={note} onChange={(event) => setNote(event.target.value)} placeholder="What moved forward, felt difficult, or needs adjusting?" /></label></div>
+      <div className="garden-checkin-body"><label>Today’s focus<textarea value={focusDraft} onChange={(event) => setFocusDraft(event.target.value)} /></label><div><span>How is your energy?</span><div className="garden-energy">{[1,2,3,4,5].map((level) => <button key={level} className={energy === level ? 'active' : ''} onClick={() => setEnergy(level)} aria-label={`Energy ${level} of 5`} aria-pressed={energy === level}>{level}</button>)}</div></div><label>Reflection or win<textarea value={note} onChange={(event) => setNote(event.target.value)} placeholder="What moved forward, felt difficult, or needs adjusting?" /></label></div>
       <div className="garden-checkin-foot"><span><Icon>psychiatry</Icon>Your workspace can change as your life changes.</span><button onClick={saveCheckIn}><Icon>eco</Icon>Save check-in</button></div>
     </aside>}
   </div>;

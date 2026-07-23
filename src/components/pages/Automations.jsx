@@ -1,10 +1,75 @@
 import React, { useState } from 'react';
 import C from '../../constants/theme';
+import { applyAutomationConsentPatch, automationConsentMessage, canConnectEmailDelivery, canEnableReminders } from '../../utils/consentGuards';
 import { Button, CardHeader, Input, Label, Select } from '../ui';
+
 const card = { background: '#fff', borderRadius: 12, boxShadow: '0 1px 6px rgba(0,0,0,.07)', overflow: 'hidden' };
+const consentLabel = { display: 'flex', gap: 8, alignItems: 'flex-start', color: C.g3, fontSize: 10, lineHeight: 1.45 };
+
 export default function Automations({ data, setData }) {
   const config = data.automations || { provider: 'auto', email: '', timezone: Intl.DateTimeFormat().resolvedOptions().timeZone, morningTime: '08:00', eveningTime: '21:00', quietStart: '22:00', quietEnd: '07:00', enabled: false };
-  const [status, setStatus] = useState(''); const update = (patch) => setData((previous) => ({ ...previous, automations: { ...config, ...patch } }));
-  const connect = async () => { try { const provider = config.provider === 'auto' ? 'google' : config.provider; const response = await fetch(`http://localhost:8787/api/auth/${provider}`); if (!response.ok) throw new Error((await response.json()).error); window.location.assign(response.url); } catch (error) { setStatus(`${error.message} Add OAuth credentials in .env.local, then start the automation API.`); } };
-  return <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}><div style={{ background: `linear-gradient(135deg,${C.navy2},${C.purple})`, borderRadius: 14, padding: '20px 24px', color: '#fff' }}><div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1 }}>AUTOMATION CENTER</div><div style={{ fontSize: 27, fontWeight: 800, marginTop: 3 }}>Plan, remind, and reflect</div><div style={{ fontSize: 12, opacity: .88, marginTop: 5 }}>Connect an account, choose quiet hours, and keep reminders aligned to your real schedule.</div></div><div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}><div style={card}><CardHeader icon="✉️" title="ACCOUNT & DELIVERY" color={C.blue} /><div style={{ padding: 13, display: 'flex', flexDirection: 'column', gap: 9 }}><div><Label>SIGN-IN PROVIDER</Label><Select value={config.provider} onChange={(event) => update({ provider: event.target.value })} options={[{ v: 'auto', l: 'Auto-detect account' }, { v: 'google', l: 'Google / Gmail' }, { v: 'microsoft', l: 'Microsoft / Outlook' }]} /></div><div><Label>REMINDER EMAIL</Label><Input type="email" value={config.email} onChange={(event) => update({ email: event.target.value })} placeholder="name@example.com" /></div><Button onClick={connect} color={C.blue} full>Connect email account</Button></div></div><div style={card}><CardHeader icon="⏰" title="REMINDER PREFERENCES" color={C.purple} /><div style={{ padding: 13, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 9 }}><div><Label>MORNING PLAN</Label><Input type="time" value={config.morningTime} onChange={(event) => update({ morningTime: event.target.value })} /></div><div><Label>EVENING REVIEW</Label><Input type="time" value={config.eveningTime} onChange={(event) => update({ eveningTime: event.target.value })} /></div><div><Label>QUIET START</Label><Input type="time" value={config.quietStart} onChange={(event) => update({ quietStart: event.target.value })} /></div><div><Label>QUIET END</Label><Input type="time" value={config.quietEnd} onChange={(event) => update({ quietEnd: event.target.value })} /></div><div style={{ gridColumn: 'span 2' }}><Label>TIMEZONE</Label><Input value={config.timezone} onChange={(event) => update({ timezone: event.target.value })} /></div><div style={{ gridColumn: 'span 2' }}><Button onClick={() => update({ enabled: !config.enabled })} color={config.enabled ? C.green : C.g3} full>{config.enabled ? 'Reminders enabled' : 'Enable reminders after connecting'}</Button></div></div></div></div><div style={card}><CardHeader icon="🔒" title="PRIVACY & CONNECTION STATUS" color={C.green} /><div style={{ padding: 13, fontSize: 11, lineHeight: 1.6, color: C.g3 }}>Tokens and API keys stay on the server. The browser stores only reminder preferences. Health and Notion connections will be opt-in modules. {status && <div style={{ color: C.orange, marginTop: 8 }}>{status}</div>}</div></div></div>;
+  const consent = data.behaviorPreferences?.consent || {};
+  const [status, setStatus] = useState('');
+  const update = (patch) => setData((previous) => ({ ...previous, automations: { ...config, ...patch } }));
+  const updateConsent = (patch) => setData((previous) => ({
+    ...previous,
+    behaviorPreferences: {
+      ...previous.behaviorPreferences,
+      consent: { ...previous.behaviorPreferences?.consent, ...patch },
+    },
+    automations: applyAutomationConsentPatch(previous.automations || config, patch),
+  }));
+  const connect = async () => {
+    if (!canConnectEmailDelivery(consent)) {
+      setStatus(automationConsentMessage(consent));
+      return;
+    }
+    try {
+      const provider = config.provider === 'auto' ? 'google' : config.provider;
+      const response = await fetch(`http://localhost:8787/api/auth/${provider}`);
+      if (!response.ok) throw new Error((await response.json()).error);
+      window.location.assign(response.url);
+    } catch (error) {
+      setStatus(`${error.message} Add OAuth credentials in .env.local, then start the automation API.`);
+    }
+  };
+  const toggleReminders = () => {
+    if (!canEnableReminders(consent)) {
+      setStatus(automationConsentMessage(consent));
+      return;
+    }
+    update({ enabled: !config.enabled });
+  };
+
+  return <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+    <div style={{ background: `linear-gradient(135deg,${C.navy2},${C.purple})`, borderRadius: 14, padding: '20px 24px', color: '#fff' }}>
+      <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1 }}>AUTOMATION CENTER</div>
+      <div style={{ fontSize: 27, fontWeight: 800, marginTop: 3 }}>Plan, remind, and reflect</div>
+      <div style={{ fontSize: 12, opacity: .88, marginTop: 5 }}>Connect an account, choose quiet hours, and keep reminders aligned to your real schedule.</div>
+    </div>
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+      <div style={card}>
+        <CardHeader icon="mail" title="ACCOUNT & DELIVERY" color={C.blue} />
+        <div style={{ padding: 13, display: 'flex', flexDirection: 'column', gap: 9 }}>
+          <div><Label>SIGN-IN PROVIDER</Label><Select value={config.provider} onChange={(event) => update({ provider: event.target.value })} options={[{ v: 'auto', l: 'Auto-detect account' }, { v: 'google', l: 'Google / Gmail' }, { v: 'microsoft', l: 'Microsoft / Outlook' }]} /></div>
+          <div><Label>REMINDER EMAIL</Label><Input type="email" value={config.email} onChange={(event) => update({ email: event.target.value })} placeholder="name@example.com" /></div>
+          <label style={consentLabel}><input type="checkbox" checked={Boolean(consent.emailDelivery)} onChange={(event) => updateConsent({ emailDelivery: event.target.checked })} />I consent to receive account, setup, and reminder emails at this address.</label>
+          <Button onClick={connect} color={C.blue} disabled={!canConnectEmailDelivery(consent)} full>Connect email account</Button>
+        </div>
+      </div>
+      <div style={card}>
+        <CardHeader icon="schedule" title="REMINDER PREFERENCES" color={C.purple} />
+        <div style={{ padding: 13, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 9 }}>
+          <div><Label>MORNING PLAN</Label><Input type="time" value={config.morningTime} onChange={(event) => update({ morningTime: event.target.value })} /></div>
+          <div><Label>EVENING REVIEW</Label><Input type="time" value={config.eveningTime} onChange={(event) => update({ eveningTime: event.target.value })} /></div>
+          <div><Label>QUIET START</Label><Input type="time" value={config.quietStart} onChange={(event) => update({ quietStart: event.target.value })} /></div>
+          <div><Label>QUIET END</Label><Input type="time" value={config.quietEnd} onChange={(event) => update({ quietEnd: event.target.value })} /></div>
+          <div style={{ gridColumn: 'span 2' }}><Label>TIMEZONE</Label><Input value={config.timezone} onChange={(event) => update({ timezone: event.target.value })} /></div>
+          <label style={{ ...consentLabel, gridColumn: 'span 2' }}><input type="checkbox" checked={Boolean(consent.reminders)} onChange={(event) => updateConsent({ reminders: event.target.checked })} />I consent to receive planned reminder notifications.</label>
+          <div style={{ gridColumn: 'span 2' }}><Button onClick={toggleReminders} color={config.enabled ? C.green : C.g3} full>{config.enabled ? 'Reminders enabled' : 'Enable reminders after connecting'}</Button></div>
+        </div>
+      </div>
+    </div>
+    <div style={card}><CardHeader icon="lock" title="PRIVACY & CONNECTION STATUS" color={C.green} /><div style={{ padding: 13, fontSize: 11, lineHeight: 1.6, color: C.g3 }}>Tokens and API keys stay on the server. The browser stores only reminder preferences. Health and Notion connections will be opt-in modules. {status && <div style={{ color: C.orange, marginTop: 8 }}>{status}</div>}</div></div>
+  </div>;
 }

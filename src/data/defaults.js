@@ -11,6 +11,17 @@ const MP    = TODAY.slice(0, 7);   // "YYYY-MM"
 
 // ─── DEFAULT DATA ─────────────────────────────────────────────────────────────
 const DEF = {
+  personalization: {
+    completed: false,
+    updatedAt: null,
+    primaryPriority: 'Build consistency',
+    activeDimensions: ['growth', 'wellbeing', 'resources', 'meaning'],
+    scoreWeights: { growth: 30, wellbeing: 30, relationships: 0, resources: 25, meaning: 15, learning: 0 },
+    habitStyle: 'balanced',
+    capacity: 'moderate',
+    coachingTone: 'supportive',
+    successDefinition: 'Steady progress on what matters without sacrificing recovery.',
+  },
   health: { records: [] },
   workspacePulse: {},
   habitGarden: {
@@ -76,7 +87,7 @@ const DEF = {
     focusSessionMinutes: 25, reminderFrequency: 'balanced', quietStart: '22:00', quietEnd: '07:00',
     workdays: [1, 2, 3, 4, 5], restDays: [0, 6], coachingTone: 'supportive', gamification: 'gentle',
     accessibility: { reducedMotion: false, highContrast: false, largeText: false },
-    consent: { behaviorEvents: false, contextualRecommendations: false, healthPersonalization: false, passiveDetection: false },
+    consent: { behaviorEvents: false, contextualRecommendations: false, healthPersonalization: false, passiveDetection: false, emailDelivery: false, reminders: false },
     disabledFeatures: [],
   },
   tasks: [],

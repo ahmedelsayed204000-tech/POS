@@ -13,17 +13,17 @@ const replacements = [
 ];
 
 const navItems = [
-  ['dashboard', 'grid_view', 'Dashboard'], ['habits', 'psychiatry', 'Habits'], ['finance', 'account_balance_wallet', 'Finance'],
+  ['dashboard', 'grid_view', 'Today'], ['habits', 'psychiatry', 'Habits'], ['finance', 'account_balance_wallet', 'Finance'],
   ['timelog', 'schedule', 'Time Log'], ['learning', 'menu_book', 'Learning'], ['fitness', 'fitness_center', 'Fitness'],
   ['sports', 'sports_soccer', 'Sports & Athlete'], ['workcareer', 'work', 'Work & Career'], ['goals', 'track_changes', 'Goals'],
   ['reports', 'monitoring', 'Reports'], ['notion', 'description', 'Notion'], ['books', 'auto_stories', 'Reading'],
   ['review', 'event_available', 'Weekly Review'], ['settings', 'settings', 'Settings'],
 ];
 
-export default function Habits({ data, setData, navigate, dateContext }) {
+export default function Habits({ data, setData, navigate, dateContext, embedded = false }) {
   const garden = data.habitGarden;
   const today = dateContext.today;
-  const [panelOpen, setPanelOpen] = useState(true);
+  const [panelOpen, setPanelOpen] = useState(false);
   const [editingAction, setEditingAction] = useState(null);
   const [newPlant, setNewPlant] = useState('');
   const [addingPlant, setAddingPlant] = useState(false);
@@ -77,15 +77,18 @@ export default function Habits({ data, setData, navigate, dateContext }) {
     setEditingAction(id);
   };
 
-  return <div className={`goal-garden-shell${panelOpen ? ' panel-open' : ''}`}>
-    <aside className="gg-sidebar">
+  return <div className={`goal-garden-shell${embedded ? ' embedded' : ''}${panelOpen ? ' panel-open' : ''}`}>
+    {!embedded && <aside className="gg-sidebar">
       <button className="gg-brand" onClick={() => navigate('dashboard')}><span className="gg-brand-mark"><Icon>psychiatry</Icon></span><span><b>PERSONAL OS</b><small>Goal Garden</small></span></button>
-      <nav aria-label="PersonalOS categories">{navItems.map(([view, icon, label]) => <button key={view} className={view === 'habits' ? 'active' : ''} onClick={() => navigate(view)} title={label}><Icon>{icon}</Icon><span>{label}</span></button>)}</nav>
+      <nav aria-label="PersonalOS categories">{navItems.map(([itemView, icon, label]) => {
+        const active = itemView === 'habits';
+        return <button key={itemView} className={active ? 'active' : ''} onClick={() => navigate(itemView)} title={label} aria-current={active ? 'page' : undefined} aria-label={`Open ${label}`}><Icon>{icon}</Icon><span>{label}</span></button>;
+      })}</nav>
       <div className="gg-profile"><span>{(data.settings?.name || 'Y')[0]}</span><div><b>{data.settings?.name || 'You'}</b><small>Your garden is growing</small></div></div>
-    </aside>
+    </aside>}
 
     <main className="gg-main">
-      <header className="gg-top"><div><Icon>light_mode</Icon><span><b>{dateContext.now.toLocaleDateString('en', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</b><small>Good morning, {data.settings?.name || 'You'}</small></span></div><button onClick={() => setPanelOpen(true)}><Icon>psychiatry</Icon>Shape my garden</button></header>
+      {!embedded && <header className="gg-top"><div><Icon>light_mode</Icon><span><b>{dateContext.now.toLocaleDateString('en', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</b><small>Good morning, {data.settings?.name || 'You'}</small></span></div><button onClick={() => setPanelOpen(true)} aria-label="Open garden preferences"><Icon>psychiatry</Icon>Shape my garden</button></header>}
       <section className="gg-north-star"><small>MY NORTH STAR</small><h1>{garden.northStar}</h1><span><i /><Icon>eco</Icon><i /></span></section>
       <div className="gg-plants" aria-label="Goal plants">{garden.plants.map((plant) => <button key={plant.id} className={plant.id === garden.selectedPlantId ? 'active' : ''} onClick={() => updateGarden((current) => ({ ...current, selectedPlantId: plant.id }))}><img src="/goal-garden-energy.png" alt="" /><b>{plant.name}</b></button>)}<button className="add" onClick={() => { setAddingPlant(true); setPanelOpen(true); }}><span><Icon>add</Icon></span><b>Add goal</b></button></div>
 

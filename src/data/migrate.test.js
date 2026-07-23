@@ -40,6 +40,8 @@ test('preserves behavior choices while adding new consent defaults', () => {
   expect(result.behaviorPreferences.coachingTone).toBe('direct');
   expect(result.behaviorPreferences.consent.behaviorEvents).toBe(true);
   expect(result.behaviorPreferences.consent.passiveDetection).toBe(false);
+  expect(result.behaviorPreferences.consent.emailDelivery).toBe(false);
+  expect(result.behaviorPreferences.consent.reminders).toBe(false);
 });
 
 test('enriches legacy habits with a minimum version and recovery plan', () => {
@@ -47,4 +49,16 @@ test('enriches legacy habits with a minimum version and recovery plan', () => {
   expect(result.habits.defs[0].minimumVersion).toMatch(/two minutes/i);
   expect(result.habits.defs[0].recoveryPlan).toMatch(/resume/i);
   expect(result.habitRecoveries).toEqual([]);
+});
+
+test('adds editable personalization without assuming every user is the same', () => {
+  const result = migrateData({ settings: { name: 'New user' } });
+  expect(result.personalization.activeDimensions.length).toBeGreaterThan(0);
+  expect(result.personalization.completed).toBe(false);
+});
+
+test('adds review dates from savedAt for legacy weekly reviews', () => {
+  const result = migrateData({ weeklyReviews: [{ id: 1, week: 'W30-2026', savedAt: '2026-07-22T09:00:00.000Z', wins: '', challenges: '', lessons: '', p1: '', p2: '', p3: '', satisfaction: 8 }] });
+
+  expect(result.weeklyReviews[0].date).toBe('2026-07-22');
 });

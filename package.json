@@ -24,7 +24,10 @@
     "build": "vite build",
     "preview": "vite preview",
     "automation-api": "node --env-file=.env.local server/index.mjs",
-    "test": "vitest run"
+    "test": "vitest run",
+    "qa:browser": "node scripts/rendered-qa.mjs",
+    "qa:ux": "node scripts/ux-certification.mjs",
+    "audit:supabase-email": "node scripts/supabase-auth-email-audit.mjs"
   },
   "browserslist": {
     "production": [

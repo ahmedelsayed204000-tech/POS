@@ -1,36 +1,88 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { Suspense, lazy, useCallback, useEffect, useRef, useState } from 'react';
 import DEF, { STORAGE_KEY } from './data/defaults';
 import { LEGACY_KEYS, migrateData } from './data/migrate';
-import { lifeScore, netWorth } from './utils/scores';
+import { netWorth } from './utils/scores';
+import { personalScore } from './utils/personalScore';
 import { useDateContext } from './utils/dates';
 import GardenWorkspace from './components/layout/GardenWorkspace';
-import Dashboard from './components/pages/Dashboard';
-import DailyCommandCenter from './components/pages/DailyCommandCenter';
-import Tasks from './components/pages/Tasks';
-import IfThenPlans from './components/pages/IfThenPlans';
-import FocusSessions from './components/pages/FocusSessions';
-import HabitBuilder from './components/pages/HabitBuilder';
-import Habits from './components/pages/Habits';
-import TimeLog from './components/pages/TimeLog';
-import Finance from './components/pages/Finance';
-import Learning from './components/pages/Learning';
-import Fitness from './components/pages/Fitness';
-import Goals from './components/pages/Goals';
-import Reports from './components/pages/Reports';
-import Notion from './components/pages/Notion';
-import ReadingList from './components/pages/ReadingList';
-import WeeklyReview from './components/pages/WeeklyReview';
-import Settings from './components/pages/Settings';
-import Automations from './components/pages/Automations';
-import Health from './components/pages/Health';
-import Sports from './components/pages/Sports';
-import WorkCareer from './components/pages/WorkCareer';
+import UnifiedToday from './components/pages/UnifiedToday';
 import AccountSync from './components/AccountSync';
 import { useCloudSync } from './lib/useCloudSync';
+import UnifiedExperience from './components/layout/UnifiedExperience';
+
+const PAGE_LOADERS = {
+  compass: () => import('./components/pages/DailyCommandCenter'),
+  tasks: () => import('./components/pages/Tasks'),
+  plans: () => import('./components/pages/IfThenPlans'),
+  focus: () => import('./components/pages/FocusSessions'),
+  habitbuilder: () => import('./components/pages/HabitBuilder'),
+  habits: () => import('./components/pages/Habits'),
+  timelog: () => import('./components/pages/TimeLog'),
+  finance: () => import('./components/pages/Finance'),
+  learning: () => import('./components/pages/Learning'),
+  fitness: () => import('./components/pages/Fitness'),
+  goals: () => import('./components/pages/Goals'),
+  reports: () => import('./components/pages/Reports'),
+  notion: () => import('./components/pages/Notion'),
+  books: () => import('./components/pages/ReadingList'),
+  review: () => import('./components/pages/WeeklyReview'),
+  settings: () => import('./components/pages/Settings'),
+  automations: () => import('./components/pages/Automations'),
+  health: () => import('./components/pages/Health'),
+  sports: () => import('./components/pages/Sports'),
+  workcareer: () => import('./components/pages/WorkCareer'),
+};
+
+const PAGE_COMPONENTS = {
+  compass: lazy(PAGE_LOADERS.compass),
+  tasks: lazy(PAGE_LOADERS.tasks),
+  plans: lazy(PAGE_LOADERS.plans),
+  focus: lazy(PAGE_LOADERS.focus),
+  habitbuilder: lazy(PAGE_LOADERS.habitbuilder),
+  habits: lazy(PAGE_LOADERS.habits),
+  timelog: lazy(PAGE_LOADERS.timelog),
+  finance: lazy(PAGE_LOADERS.finance),
+  learning: lazy(PAGE_LOADERS.learning),
+  fitness: lazy(PAGE_LOADERS.fitness),
+  goals: lazy(PAGE_LOADERS.goals),
+  reports: lazy(PAGE_LOADERS.reports),
+  notion: lazy(PAGE_LOADERS.notion),
+  books: lazy(PAGE_LOADERS.books),
+  review: lazy(PAGE_LOADERS.review),
+  settings: lazy(PAGE_LOADERS.settings),
+  automations: lazy(PAGE_LOADERS.automations),
+  health: lazy(PAGE_LOADERS.health),
+  sports: lazy(PAGE_LOADERS.sports),
+  workcareer: lazy(PAGE_LOADERS.workcareer),
+};
+const VALID_VIEWS = new Set(['dashboard', ...Object.keys(PAGE_LOADERS)]);
+
+const viewFromLocation = () => {
+  const params = new URLSearchParams(window.location.search);
+  const queryView = params.get('view');
+  if (VALID_VIEWS.has(queryView)) return queryView;
+  const hashMatch = window.location.hash.match(/^#app\/([^?]+)/);
+  const hashView = hashMatch?.[1];
+  return VALID_VIEWS.has(hashView) ? hashView : 'dashboard';
+};
+
+const writeViewToUrl = (nextView, mode = 'push') => {
+  const method = mode === 'replace' ? 'replaceState' : 'pushState';
+  if (window.location.protocol === 'file:') {
+    const nextHash = nextView === 'dashboard' ? 'app' : `app/${nextView}`;
+    if (window.location.hash !== `#${nextHash}`) window.history[method]({}, '', `#${nextHash}`);
+    return;
+  }
+  const url = new URL(window.location.href);
+  url.pathname = '/app';
+  if (nextView === 'dashboard') url.searchParams.delete('view');
+  else url.searchParams.set('view', nextView);
+  if (window.location.href !== url.href) window.history[method]({}, '', url);
+};
 
 export default function App() {
   const [data, setDataState] = useState(DEF);
-  const [view, setView] = useState('dashboard');
+  const [view, setView] = useState(viewFromLocation);
   const [loaded, setLoaded] = useState(false);
   const [saved, setSaved] = useState(false);
   const [canUndo, setCanUndo] = useState(false);
@@ -54,6 +106,11 @@ export default function App() {
     if (previous) setDataState(previous);
     setCanUndo(historyRef.current.length > 0);
   }, []);
+  const navigateView = useCallback((nextView, options = {}) => {
+    const safeView = VALID_VIEWS.has(nextView) ? nextView : 'dashboard';
+    setView(safeView);
+    writeViewToUrl(safeView, options.replace ? 'replace' : 'push');
+  }, []);
 
   useEffect(() => {
     try {
@@ -65,9 +122,25 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (!loaded || data.scoreLog?.some((entry) => entry.date === dateContext.today)) return;
-    setData((previous) => ({ ...previous, scoreLog: [...(previous.scoreLog || []), { date: dateContext.today, score: Number(lifeScore(previous).toFixed(1)) }].slice(-60) }));
-  }, [loaded, dateContext.today, setData]);
+    const syncViewFromUrl = () => setView(viewFromLocation());
+    window.addEventListener('popstate', syncViewFromUrl);
+    window.addEventListener('hashchange', syncViewFromUrl);
+    writeViewToUrl(viewFromLocation(), 'replace');
+    return () => {
+      window.removeEventListener('popstate', syncViewFromUrl);
+      window.removeEventListener('hashchange', syncViewFromUrl);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!loaded) return;
+    setData((previous) => {
+      const score = Number(personalScore(previous, dateContext).score.toFixed(1));
+      const existing = previous.scoreLog || [];
+      if (existing.some((entry) => entry.date === dateContext.today && entry.score === score)) return previous;
+      return { ...previous, scoreLog: [...existing.filter((entry) => entry.date !== dateContext.today), { date: dateContext.today, score }].slice(-60) };
+    });
+  }, [loaded, dateContext, dateContext.today, setData]);
 
   useEffect(() => {
     if (!loaded) return;
@@ -96,36 +169,28 @@ export default function App() {
     return () => window.clearTimeout(timer);
   }, [data, loaded]);
 
-  if (!loaded) return <div style={{ display: 'grid', placeItems: 'center', minHeight: '100vh', background: '#0D1B2A', color: '#fff', fontFamily: 'Arial, sans-serif' }}>Loading Personal OS…</div>;
+  if (!loaded) return <div style={{ display: 'grid', placeItems: 'center', minHeight: '100vh', background: '#0D1B2A', color: '#fff', fontFamily: 'Arial, sans-serif' }}>Loading Personal OS...</div>;
 
-  const pageProps = { data, setData, navigate: setView, dateContext };
-  const pages = {
-    dashboard: <Dashboard {...pageProps} />, compass: <DailyCommandCenter {...pageProps} />, tasks: <Tasks {...pageProps} />, plans: <IfThenPlans {...pageProps} />, focus: <FocusSessions {...pageProps} />, habitbuilder: <HabitBuilder {...pageProps} />, habits: <Habits {...pageProps} />, timelog: <TimeLog {...pageProps} />,
-    finance: <Finance {...pageProps} />, learning: <Learning {...pageProps} />, fitness: <Fitness {...pageProps} />,
-    goals: <Goals {...pageProps} />, reports: <Reports data={data} dateContext={dateContext} />,
-    notion: <Notion {...pageProps} />, books: <ReadingList {...pageProps} />, review: <WeeklyReview {...pageProps} />,
-    settings: <Settings {...pageProps} />,
-    automations: <Automations {...pageProps} />,
-    health: <Health {...pageProps} />,
-    sports: <Sports {...pageProps} />,
-    workcareer: <WorkCareer {...pageProps} />,
+  const pageProps = { data, setData, navigate: navigateView, dateContext };
+  const preloadView = (nextView) => {
+    if (nextView === 'dashboard') return;
+    PAGE_LOADERS[nextView]?.();
   };
-  if (view === 'dashboard') return <><Dashboard {...pageProps} /><AccountSync cloud={cloud} /></>;
-  if (view === 'habits') return <><Habits {...pageProps} /><AccountSync cloud={cloud} /></>;
-  if (view === 'focus') return <div style={{ minHeight: '100vh', background: '#030914', padding: '7vh 18px' }}><FocusSessions {...pageProps} /></div>;
+  const WorkspacePage = PAGE_COMPONENTS[view] || PAGE_COMPONENTS.compass;
+  const workspacePage = view === 'habits'
+    ? <WorkspacePage {...pageProps} embedded />
+    : <WorkspacePage {...pageProps} />;
+  const content = view === 'dashboard'
+    ? <UnifiedToday {...pageProps} />
+    : <GardenWorkspace view={view} data={data} setData={setData} navigate={navigateView} dateContext={dateContext} embedded>
+      <Suspense fallback={<div className="ux-workspace-loading" role="status">Loading workspace</div>}>
+        {workspacePage}
+      </Suspense>
+    </GardenWorkspace>;
   return <>
-    <GardenWorkspace
-      view={view}
-      data={data}
-      setData={setData}
-      navigate={setView}
-      dateContext={dateContext}
-      saved={saved}
-      canUndo={canUndo}
-      onUndo={undo}
-    >
-      {pages[view] ?? pages.dashboard}
-    </GardenWorkspace>
-    <AccountSync cloud={cloud} />
+    <UnifiedExperience view={view} data={data} setData={setData} navigate={navigateView} preloadView={preloadView} dateContext={dateContext} saved={saved} canUndo={canUndo} onUndo={undo} cloud={cloud}>
+      {content}
+    </UnifiedExperience>
+    <AccountSync cloud={cloud} data={data} setData={setData} />
   </>;
 }

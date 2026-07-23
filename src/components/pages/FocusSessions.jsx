@@ -1,9 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import C from '../../constants/theme';
 import { clampSessionMinutes, formatFocusTime, nextSessionMinutes } from '../../utils/focusSessions';
-import { Button, CardHeader, Input, Label, Select } from '../ui';
 
-const card = { background: '#071424', border: '1px solid rgba(135,167,194,.22)', borderRadius: 16, color: '#fff8e8', overflow: 'hidden', boxShadow: '0 18px 60px rgba(4,12,24,.28)' };
+const Icon = ({ children }) => <span className="material-symbols-rounded" aria-hidden="true">{children}</span>;
 
 export default function FocusSessions({ data, setData, navigate }) {
   const tasks = (data.tasks || []).filter((task) => !['completed', 'cancelled'].includes(task.status));
@@ -53,10 +51,31 @@ export default function FocusSessions({ data, setData, navigate }) {
     navigate('dashboard');
   };
 
-  if (!active && latestFinished) return <div style={{ maxWidth: 680, margin: '0 auto', ...card }}><CardHeader icon="◌" title="GENTLE COMPLETION" color={C.purple} /><div style={{ padding: 22, display: 'grid', gap: 13 }}><h2 style={{ margin: 0 }}>{latestFinished.objective}</h2><div><Label>DID YOU MAKE USEFUL PROGRESS?</Label><Select value={reflection.progress} onChange={(event) => setReflection({ ...reflection, progress: event.target.value })} options={[{ v: 'yes', l: 'Yes' }, { v: 'some', l: 'Some progress' }, { v: 'no', l: 'Not this time' }]} /></div><div><Label>WHAT INTERRUPTED YOU?</Label><Input value={reflection.interruption} onChange={(event) => setReflection({ ...reflection, interruption: event.target.value })} placeholder="Optional and judgment-free" /></div><div><Label>THE NEXT SESSION SHOULD BE</Label><Select value={reflection.nextLength} onChange={(event) => setReflection({ ...reflection, nextLength: event.target.value })} options={['shorter', 'equal', 'longer']} /></div><Button onClick={saveReflection} color={C.green} full>Save reflection</Button><Button onClick={() => navigate('dashboard')} color={C.blue} outline full>Return to dashboard</Button></div></div>;
+  if (!active && latestFinished) return <section className="focus-modern">
+    <header><small>GENTLE COMPLETION</small><h2>{latestFinished.objective}</h2><p>Close the loop without turning reflection into a second task.</p></header>
+    <div className="focus-form-grid">
+      <label><span>Did you make useful progress?</span><select value={reflection.progress} onChange={(event) => setReflection({ ...reflection, progress: event.target.value })}><option value="yes">Yes</option><option value="some">Some progress</option><option value="no">Not this time</option></select></label>
+      <label><span>What interrupted you?</span><input value={reflection.interruption} onChange={(event) => setReflection({ ...reflection, interruption: event.target.value })} placeholder="Optional and judgment-free" /></label>
+      <label><span>The next session should be</span><select value={reflection.nextLength} onChange={(event) => setReflection({ ...reflection, nextLength: event.target.value })}>{['shorter', 'equal', 'longer'].map((value) => <option key={value} value={value}>{value}</option>)}</select></label>
+    </div>
+    <footer><button className="focus-primary" onClick={saveReflection}><Icon>check</Icon>Save reflection</button><button className="focus-secondary" onClick={() => navigate('dashboard')}>Return to Today</button></footer>
+  </section>;
 
-  if (!active) return <div style={{ maxWidth: 680, margin: '0 auto', ...card }}><CardHeader icon="◎" title="START A FOCUS SESSION" color={C.navy2} /><div style={{ padding: 22, display: 'grid', gap: 13 }}><div><Label>CURRENT TASK</Label><Select value={taskId} onChange={(event) => setTaskId(event.target.value)} options={[{ v: '', l: 'Intentional focus without a task' }, ...tasks.map((task) => ({ v: task.id, l: task.title }))]} /></div>{selectedTask?.nextAction && <div style={{ color: '#8fd8c1', fontSize: 12 }}>First action: {selectedTask.nextAction}</div>}<div><Label>DURATION · YOUR CHOICE</Label><Input type="number" min="5" max="180" value={minutes} onChange={(event) => setMinutes(clampSessionMinutes(event.target.value))} /></div><Button onClick={start} color={C.gold} full>Begin gently</Button><Button onClick={() => navigate('dashboard')} color={C.blue} outline full>Return to dashboard</Button></div></div>;
+  if (!active) return <section className="focus-modern">
+    <header><small>START A FOCUS SESSION</small><h2>Begin one protected block.</h2><p>Choose the task, set a humane duration, and keep everything else parked.</p></header>
+    <div className="focus-form-grid">
+      <label><span>Current task</span><select value={taskId} onChange={(event) => setTaskId(event.target.value)}><option value="">Intentional focus without a task</option>{tasks.map((task) => <option key={task.id} value={task.id}>{task.title}</option>)}</select></label>
+      <label><span>Duration</span><input type="number" min="5" max="180" value={minutes} onChange={(event) => setMinutes(clampSessionMinutes(event.target.value))} /></label>
+    </div>
+    {selectedTask?.nextAction && <div className="focus-note"><Icon>arrow_forward</Icon>First action: {selectedTask.nextAction}</div>}
+    <footer><button className="focus-primary" onClick={start}><Icon>timer</Icon>Begin gently</button><button className="focus-secondary" onClick={() => navigate('dashboard')}>Return to Today</button></footer>
+  </section>;
 
   const remaining = Math.max(0, active.plannedMinutes * 60 - elapsed);
-  return <div style={{ maxWidth: 760, margin: '0 auto', ...card }}><div style={{ padding: 26, display: 'grid', gap: 18, textAlign: 'center' }}><div><div style={{ color: '#8fd8c1', fontSize: 10, letterSpacing: '.12em' }}>CURRENT OBJECTIVE</div><h1 style={{ margin: '6px 0' }}>{active.objective}</h1><div style={{ color: '#b8c8d8', fontSize: 12 }}>{active.nextAction}</div></div><div aria-label={`${formatFocusTime(remaining)} remaining`} style={{ fontSize: 64, fontVariantNumeric: 'tabular-nums', color: '#f4c66a' }}>{formatFocusTime(remaining)}</div><div style={{ display: 'flex', justifyContent: 'center', gap: 8, flexWrap: 'wrap' }}>{active.status === 'running' ? <Button onClick={pause} color={C.blue}>Pause</Button> : <Button onClick={resume} color={C.green}>Resume</Button>}<Button onClick={extend} color={C.purple} outline>Extend 5 min</Button><Button onClick={() => end('completed')} color={C.green}>Finish</Button><Button onClick={() => end('stopped')} color={C.red} outline>Emergency exit</Button></div><div style={{ textAlign: 'left', background: 'rgba(255,255,255,.06)', borderRadius: 10, padding: 12 }}><Label>THOUGHT PARKING</Label><div style={{ display: 'flex', gap: 7 }}><Input value={thought} onChange={(event) => setThought(event.target.value)} placeholder="Store it here so you do not have to hold it" /><Button onClick={parkThought} color={C.blue} small>Park</Button></div>{active.thoughtParking.map((item) => <div key={item.id} style={{ color: '#b8c8d8', fontSize: 10, marginTop: 6 }}>• {item.text}</div>)}</div><div style={{ color: '#8296a8', fontSize: 9 }}>Sound is off. No rewards or secondary navigation appear during focus.</div></div></div>;
+  return <section className="focus-modern focus-running">
+    <header><small>CURRENT OBJECTIVE</small><h2>{active.objective}</h2>{active.nextAction && <p>{active.nextAction}</p>}</header>
+    <div className="focus-timer" aria-label={`${formatFocusTime(remaining)} remaining`}>{formatFocusTime(remaining)}</div>
+    <div className="focus-controls">{active.status === 'running' ? <button onClick={pause}><Icon>pause</Icon>Pause</button> : <button onClick={resume}><Icon>play_arrow</Icon>Resume</button>}<button onClick={extend}><Icon>add</Icon>Extend 5 min</button><button onClick={() => end('completed')}><Icon>check</Icon>Finish</button><button onClick={() => end('stopped')}><Icon>logout</Icon>Stop</button></div>
+    <div className="focus-parking"><label><span>Thought parking</span><div><input value={thought} onChange={(event) => setThought(event.target.value)} placeholder="Store it here so you do not have to hold it" /><button onClick={parkThought}>Park</button></div></label>{active.thoughtParking.map((item) => <p key={item.id}>{item.text}</p>)}</div>
+  </section>;
 }

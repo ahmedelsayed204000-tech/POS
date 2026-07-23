@@ -3,6 +3,7 @@ html, body, #root { margin: 0; min-height: 100%; }
 button, input, select, textarea { font: inherit; }
 
 @media (max-width: 760px) {
+  .test-version-badge { display: none; }
   .app-shell { height: auto !important; min-height: 100dvh; overflow: visible !important; display: block !important; }
   .app-sidebar { position: sticky; top: 0; z-index: 20; width: 100% !important; height: auto; flex-direction: row !important; overflow-x: auto !important; }
   .app-sidebar > div:first-child, .app-sidebar > div:last-child { display: none; }

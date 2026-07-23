@@ -7,7 +7,7 @@ import C from './theme';
 const NAV = [
   { id: 'health', icon: '❤️', label: 'Health', color: C.green },
   { id: 'automations', icon: '⚡', label: 'Automations', color: C.purple },
-  { id: 'dashboard', icon: '🏠', label: 'Dashboard',     color: C.gold    },
+  { id: 'dashboard', icon: '🏠', label: 'Today',         color: C.gold    },
   { id: 'habits',    icon: '📅', label: 'Habits',        color: C.teal    },
   { id: 'timelog',   icon: '⏱', label: 'Time Log',      color: C.blue    },
   { id: 'finance',   icon: '💰', label: 'Finance',       color: C.green   },

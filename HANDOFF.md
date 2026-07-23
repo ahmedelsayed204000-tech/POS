@@ -2,8 +2,8 @@
 
 **Version:** July 2026 workspace
 
-**Updated:** July 17, 2026
-**Status:** Functional React prototype with local-first persistence, optional Supabase cloud sync, and experimental integration services
+**Updated:** July 22, 2026
+**Status:** Functional React prototype with local-first persistence, optional Supabase cloud sync, experimental integration services, and local browser smoke QA
 
 ## 1. Product summary
 
@@ -18,14 +18,25 @@ The current visual direction combines a conventional productivity dashboard with
 
 ## 2. Current architecture
 
+### Unified personalized experience (development branch)
+
+- `UnifiedExperience.jsx` provides one persistent shell for Today, Compass, Tasks, Focus, Habits, and user-selected life dimensions.
+- `UnifiedToday.jsx` derives a connected journey from the current goal, Daily Compass outcome, task, focus block, and reflection step. It also owns the current-day plan, quick win capture, reset support, sleep-aware schedule guidance, activity story, and Life Score summary.
+- Behavior events and workspace check-ins feed one cross-domain activity story.
+- `personalization` stores five optional answers: current priority/success definition, active life dimensions, habit style, available capacity, and coaching tone.
+- Navigation and the explainable Life Score use only dimensions selected by the user. Score weights are editable and missing evidence is shown separately from performance.
+- Supabase email magic links redirect to `/app?profile=1`, sign the user in, and open the editable five-question profile check-in.
+- The profile / Your Garden modal is URL-aware: opening it writes `?profile=1`, browser Back closes it, and Escape, close, or save clears the modal URL state.
+- Signed-in name, email, and timezone are mirrored to owner-protected `public.profiles`; the complete personalized document continues to sync through `public.personal_data`.
+
 ```text
 Root.jsx
 ├── Website.jsx                         public product website
 └── App.jsx                             application state and view selection
     ├── localStorage                    primary local persistence
     ├── useCloudSync                    optional Supabase auth and sync
-    ├── Dashboard / Habits              custom full-page experiences
-    └── GardenWorkspace                 shared shell for most other modules
+    ├── UnifiedExperience              persistent app shell and profile modal
+    └── GardenWorkspace                 shared workspace frame for modules
         └── selected page component
 
 Optional services
@@ -40,7 +51,7 @@ Optional services
 - Vite 7 build system.
 - Recharts for charts.
 - Zod for import validation.
-- No routing library. `Root.jsx` selects website versus app from the URL, while `App.jsx` uses a `view` string for in-app navigation.
+- No routing library. `Root.jsx` selects website versus app from the URL, while `App.jsx` uses a URL-synced `view` string for in-app navigation.
 - Most application data remains one object owned by `App.jsx` and passed to pages as `{ data, setData }`.
 - Styling is a mixture of shared CSS and legacy inline styles.
 
@@ -74,16 +85,16 @@ The app remains usable in local-only mode when Supabase is not configured.
 - Launches the application through `/app` or the local-file hash route.
 - Uses the Life Garden brand imagery and product narrative.
 
-### Dashboard
+### Unified Today
 
-- Life-area overview and planning-assistant presentation.
+- Connected journey from goal, Daily Compass, task, focus, and reflection state.
 - Daily plan display with completion controls.
 - Monthly income and expense summary.
 - Goal, habit, health, learning, and review summaries.
-- Quick actions for adding a win, asking the planner, rebalancing the day, and rescuing an overloaded day.
+- Quick actions for completing plan items, adding a win, and rescuing an overloaded day with a two-minute reset.
 - Navigation into related modules.
 
-Some recommendations are currently presentation rules rather than a complete adaptive planning engine.
+Some recommendations are currently deterministic guidance rather than a complete adaptive planning engine.
 
 ### Goal Garden and habits
 
@@ -108,12 +119,12 @@ The Habit Builder now enriches existing Goal Garden habits with a personal reaso
 - Per-workspace check-in history, limited to the latest 30 records.
 - Daily focus-completion state.
 
-Dashboard and Habits currently use their own full-page layouts instead of this shared shell.
+Today, Habits, Focus, Compass, Tasks, and selected life-dimension workspaces now share the unified shell. Legacy standalone Dashboard, Sidebar, and TopBar files have been removed in favor of `UnifiedExperience` and `UnifiedToday`.
 
 ### Daily planning
 
 - `dailyPlan` records dated actions with completion state.
-- The dashboard reads and updates the current day's plan.
+- Unified Today reads and updates the current day's plan.
 - Daily Compass asks for success criteria, one primary outcome, up to two secondary outcomes, likely friction, the smallest first action, energy, available time, stopping time, and a low-energy fallback.
 - It derives a first focus block and transition buffer from available capacity and the user's preferred focus duration.
 - Saving creates a typed P1 task and mirrors the selected outcomes into the existing dashboard plan.
@@ -188,7 +199,7 @@ The timer is still owned by the Learning module; it is not yet a domain-wide fle
 - Sleep-aware scheduling helper with recovery, lighter-focus, and ready states.
 - Automated tests for CSV normalization, merging, and sleep guidance.
 
-`SleepSchedule.jsx` exists as a reusable component but is not currently a separate navigation destination.
+Sleep-aware guidance now appears inside Unified Today through `getSleepSchedule`; there is no separate Sleep Schedule page.
 
 ### Sports and athlete tracking
 
@@ -226,7 +237,7 @@ The older Goals page also contains a separate career-application collection. The
 
 ### Reports
 
-- Life Score and six-dimension summaries.
+- Explainable Life Score and selected-dimension summaries.
 - Life Score trend.
 - Weight trend.
 - Seven-day study-minutes chart.
@@ -239,7 +250,7 @@ The reports are descriptive and are not yet the behavior-support analytics or Aw
 
 - Wins, challenges, lessons, and three priorities.
 - Satisfaction input.
-- Auto-calculated Life Score and dimension scores.
+- Auto-calculated explainable Life Score and selected dimension scores.
 - Update-in-place for the current week.
 - Review history.
 
@@ -345,7 +356,10 @@ src/
 │   └── pages/                       product modules
 └── utils/
     ├── dates.js                     current date and ISO-week helpers
-    ├── scores.js                    Life Score calculations
+    ├── personalScore.js             explainable Life Score calculations
+    ├── privacyControls.js           personalization/history export and deletion helpers
+    ├── consentGuards.js             reminder and email consent enforcement
+    ├── scores.js                    legacy score helpers
     └── sleepSchedule.js             sleep-aware guidance
 
 server/index.mjs                     integration/OAuth development server
@@ -362,9 +376,11 @@ pnpm install
 pnpm start
 pnpm test
 pnpm build
+pnpm qa:browser
 ```
 
-The Vite development URL is normally `http://localhost:5173`; use `/app` for the application surface.
+The Vite development URL is normally `http://localhost:5173`; use `/app` for the application surface. Workspaces can be opened directly with `?view=`, such as `/app?view=tasks`. The profile check-in can be opened directly with `/app?profile=1`.
+`pnpm qa:browser` expects the app to already be running and writes screenshots/results to `qa/rendered-qa`. Set `QA_BASE_URL` when testing a different local port.
 
 Optional local integration service:
 
@@ -389,8 +405,13 @@ VITE_SUPABASE_ANON_KEY
 - Workspace check-in schema validation.
 - Health CSV normalization and duplicate merging.
 - Sleep-aware schedule recommendations.
+- Explainable Life Score freshness, confidence, sparse-data handling, and every selectable dimension.
+- Consent enforcement for email delivery and reminders.
+- Privacy export/delete helpers for personalization and behavioral history.
+- Shared form inputs forwarding important DOM props.
+- Local browser smoke coverage for desktop/mobile screenshots, overflow, profile modal keyboard and URL behavior, core navigation, and browser console/page errors.
 
-The project does not yet have broad component or end-to-end coverage for critical user journeys.
+The project has focused local browser smoke coverage, but it does not yet have broad Playwright-style end-to-end coverage for every critical user journey.
 
 ## 7. Standalone preview
 
@@ -400,19 +421,20 @@ The project does not yet have broad component or end-to-end coverage for critica
 
 1. The root data object and prop drilling will become difficult to maintain as behavior-support features grow.
 2. The app has two partially overlapping visual/layout systems.
-3. Dashboard and Habits do not use the same shell as most other pages.
-4. In-app navigation is not URL-addressable and lacks browser-history semantics.
+3. Some older workspace internals still use legacy inline styles below the unified shell.
+4. In-app navigation is URL-addressable through `?view=`, and the profile modal is URL-addressable through `?profile=1`; individual records and other modal states still do not have a full route model.
 5. Daily planning is not yet a full task domain model.
 6. Learning owns the only focus timer; general focus sessions are not implemented.
 7. Career opportunities are duplicated between `goals/career` and `workCareer/opportunities`.
-8. Some implemented components are not wired into navigation: Daily Command Center, Investment Plan, and Sleep Schedule.
+8. Some implemented components are not wired into navigation: Investment Plan remains embedded-only/not independently routed.
 9. Automated reminder scheduling is not implemented; only preferences, OAuth, and test delivery exist.
 10. The development OAuth token store is not production-ready.
 11. Domain-table mirroring deletes and reinserts collections on every save, which is simple but inefficient and loses stable database row identity.
 12. Remote sync uses last-loaded/last-saved document semantics and has no explicit conflict-resolution UI.
-13. Privacy controls do not yet cover behavioral history, contextual tracking, personalization, or selective deletion.
-14. Accessibility has not received complete screen-reader, keyboard, large-text, contrast, and reduced-motion validation.
-15. Several source files and legacy strings contain mojibake character encoding that should be normalized carefully.
+13. Privacy controls now cover personalization and behavioral-history export/delete, but selective deletion for every future data domain still needs to be maintained as new tracking surfaces are added.
+14. Accessibility has focused keyboard/modal smoke coverage, but not complete screen-reader, large-text, contrast, and reduced-motion validation.
+15. Browser smoke testing is local/manual because Playwright is not pinned as a project dependency for GitHub CI.
+16. Several source files and legacy strings contain mojibake character encoding that should be normalized carefully.
 
 ## 9. Behavior-support roadmap status
 
@@ -422,6 +444,8 @@ The July behavior-change and cosmic-visual-system brief is a future product road
 
 - Persisted behavior-support preferences for work hours, sleep/wake times, focus duration, reminder frequency, coaching tone, gamification, and accessibility.
 - Explicit opt-in consent controls for behavior events, contextual recommendations, health personalization, and passive detection; all default to off for new and migrated data.
+- Explicit consent enforcement for email delivery and reminder automation.
+- Export/delete controls for personalization and behavioral history.
 - Reserved task, behavior-event, focus-session, and If–Then-plan collections for staged implementation.
 - Daily plans and completion state.
 - Goals with next actions.
@@ -446,7 +470,7 @@ The July behavior-change and cosmic-visual-system brief is a future product road
 - Adaptive reminder decision engine and explanation UI.
 - Resilient-consistency analytics and identity evidence.
 - Behavior-based weekly recommendations.
-- Full privacy center, selective deletion, and behavioral export controls beyond the new foundational consent settings.
+- A broader privacy center with selective deletion coverage for every future data domain.
 - Cosmic theme, Time Dimension, Time Gravity, constellations, habit orbits, or Memory Corridor.
 - Cognitive Load Mode, awareness exercises, or adaptive visual stimulation.
 

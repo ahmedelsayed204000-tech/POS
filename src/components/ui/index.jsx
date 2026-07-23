@@ -1,11 +1,13 @@
-// ─── UI ATOMS ─────────────────────────────────────────────────────────────────
+// UI atoms
 // Import individual components:
 //   import { Bar, Button, Input, ... } from '../ui';
 
 import React, { useState, useRef, useEffect } from 'react';
 import C from '../../constants/theme';
 
-// ─── BAR ──────────────────────────────────────────────────────────────────────
+const materialIconPattern = /^[a-z][a-z0-9_]*$/;
+
+// Bar
 export const Bar = ({ p, color = C.green, h = 6 }) => (
   <div style={{ background: C.g1, borderRadius: 99, height: h, overflow: 'hidden' }}>
     <div
@@ -20,7 +22,7 @@ export const Bar = ({ p, color = C.green, h = 6 }) => (
   </div>
 );
 
-// ─── BUTTON ───────────────────────────────────────────────────────────────────
+// Button
 export const Button = ({
   children,
   onClick,
@@ -51,13 +53,14 @@ export const Button = ({
   </button>
 );
 
-// ─── INPUT ────────────────────────────────────────────────────────────────────
-export const Input = ({ value, onChange, placeholder = '', type = 'text', style = {} }) => (
+// Input
+export const Input = ({ value, onChange, placeholder = '', type = 'text', style = {}, ...props }) => (
   <input
     type={type}
     value={value}
     onChange={onChange}
     placeholder={placeholder}
+    {...props}
     style={{
       border: `1.5px solid ${C.border}`,
       borderRadius: 7,
@@ -72,11 +75,12 @@ export const Input = ({ value, onChange, placeholder = '', type = 'text', style 
   />
 );
 
-// ─── SELECT ───────────────────────────────────────────────────────────────────
-export const Select = ({ value, onChange, options, style = {} }) => (
+// Select
+export const Select = ({ value, onChange, options, style = {}, ...props }) => (
   <select
     value={value}
     onChange={onChange}
+    {...props}
     style={{
       border: `1.5px solid ${C.border}`,
       borderRadius: 7,
@@ -97,13 +101,14 @@ export const Select = ({ value, onChange, options, style = {} }) => (
   </select>
 );
 
-// ─── TEXTAREA ─────────────────────────────────────────────────────────────────
-export const Textarea = ({ value, onChange, placeholder = '', rows = 3 }) => (
+// Textarea
+export const Textarea = ({ value, onChange, placeholder = '', rows = 3, style = {}, ...props }) => (
   <textarea
     value={value}
     onChange={onChange}
     placeholder={placeholder}
     rows={rows}
+    {...props}
     style={{
       border: `1.5px solid ${C.border}`,
       borderRadius: 7,
@@ -115,11 +120,12 @@ export const Textarea = ({ value, onChange, placeholder = '', rows = 3 }) => (
       boxSizing: 'border-box',
       resize: 'vertical',
       lineHeight: 1.5,
+      ...style,
     }}
   />
 );
 
-// ─── PILL ─────────────────────────────────────────────────────────────────────
+// Pill
 export const Pill = ({ text, color = C.blue }) => (
   <span
     style={{
@@ -136,14 +142,14 @@ export const Pill = ({ text, color = C.blue }) => (
   </span>
 );
 
-// ─── LABEL ────────────────────────────────────────────────────────────────────
+// Label
 export const Label = ({ children }) => (
   <div style={{ fontSize: 10, fontWeight: 700, color: C.g3, marginBottom: 3, letterSpacing: 0.3 }}>
     {children}
   </div>
 );
 
-// ─── CARD HEADER ──────────────────────────────────────────────────────────────
+// Card header
 export const CardHeader = ({ icon, title, right, color = C.navy2 }) => (
   <div
     style={{
@@ -155,14 +161,16 @@ export const CardHeader = ({ icon, title, right, color = C.navy2 }) => (
     }}
   >
     <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-      <span style={{ fontSize: 14 }}>{icon}</span>
+      {typeof icon === 'string' && materialIconPattern.test(icon)
+        ? <span className="material-symbols-rounded" aria-hidden="true" style={{ fontSize: 16 }}>{icon}</span>
+        : <span aria-hidden="true" style={{ fontSize: 14 }}>{icon}</span>}
       <span style={{ color: color === C.gold ? C.dark : '#fff', fontWeight: 700, fontSize: 12 }}>{title}</span>
     </div>
     {right && <div>{right}</div>}
   </div>
 );
 
-// ─── CHART TOOLTIP ────────────────────────────────────────────────────────────
+// Chart tooltip
 export const ChartTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   return (
@@ -186,7 +194,7 @@ export const ChartTooltip = ({ active, payload, label }) => {
   );
 };
 
-// ─── EDIT TEXT (double-click inline edit) ─────────────────────────────────────
+// Edit text (double-click inline edit)
 export const EditText = ({ value, onSave, style = {}, placeholder = '' }) => {
   const [editing, setEditing] = useState(false);
   const [val, setVal]         = useState(value);

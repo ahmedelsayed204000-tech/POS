@@ -22,3 +22,11 @@ test('requires explicit boolean behavior consent', () => {
   const data = { ...DEF, behaviorPreferences: { ...DEF.behaviorPreferences, consent: { ...DEF.behaviorPreferences.consent, behaviorEvents: 'yes' } } };
   expect(validateImport(JSON.stringify(data)).success).toBe(false);
 });
+
+test('requires explicit boolean email and reminder consent', () => {
+  const emailData = { ...DEF, behaviorPreferences: { ...DEF.behaviorPreferences, consent: { ...DEF.behaviorPreferences.consent, emailDelivery: 'yes' } } };
+  const reminderData = { ...DEF, behaviorPreferences: { ...DEF.behaviorPreferences, consent: { ...DEF.behaviorPreferences.consent, reminders: 'yes' } } };
+
+  expect(validateImport(JSON.stringify(emailData)).success).toBe(false);
+  expect(validateImport(JSON.stringify(reminderData)).success).toBe(false);
+});

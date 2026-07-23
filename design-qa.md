@@ -1,52 +1,55 @@
-# PersonalOS frontend color design QA
+# Unified PersonalOS Design QA
 
-- Source visual truth: `qa/goal-garden-source.png`
-- Main implementation screenshot: `qa/color-audit/05-finance-after.png`
-- Mobile implementation screenshot: `qa/color-audit/13-finance-mobile-after.png`
-- Full-view comparison: `qa/color-audit/14-source-finance-comparison.png`
-- Focused Finance comparison: `qa/color-audit/15-finance-before-after.png`
-- Focused Reports comparison: `qa/color-audit/18-reports-before-final.png`
-- Desktop viewport: 1280 × 720
-- Mobile viewport: 390 × 844
-- State: personalized Finance focus saved and completed; Reports detail charts visible
+- Source visual truth: `C:\Users\pc\.codex\generated_images\019f712d-d5e2-7453-a607-ddfa2ecc8e4f\exec-0a6f80a0-d7db-4df5-9512-55f87e0c4f6a.png`
+- Implementation screenshots:
+  - `qa\rendered-qa\desktop-1440x1024-today.png`
+  - `qa\rendered-qa\desktop-1440x1024-profile-modal.png`
+  - `qa\rendered-qa\mobile-390x844-today.png`
+  - `qa\rendered-qa\mobile-390x844-profile-modal.png`
+- Machine-readable QA results: `qa\rendered-qa\qa-results.json`
+- Intended viewport: 1440 x 1024 desktop; 390 x 844 responsive check
+- State: personalized Today journey with profile modal available
+- Verification date: July 22, 2026
+- Browser smoke status: unblocked for local QA. Run against an already-running app with `QA_BASE_URL=http://127.0.0.1:5173 npm run qa:browser`; change the port if Vite selected another one.
 
-## Fidelity review
+## Findings
 
-- Fonts and typography: Playfair Display remains the display face and DM Sans the UI face. Display hierarchy, small uppercase labels, wrapping, and control text remain aligned with the source.
-- Spacing and layout: the forest sidebar, cream canvas, rounded botanical hero, three quick-action cards, and detail rhythm remain unchanged. Mobile Finance stays within the viewport without horizontal page overflow.
-- Colors and tokens: the prior rainbow legacy palette is replaced by forest `#063F2F`, deep green `#0D6547`, leaf `#247C5A`, gold `#D6A62F`, cream `#FBF8EF`, moss, neutral green-gray, and muted clay states.
-- Image quality: the real plant asset remains sharp, correctly cropped, and integrated into the cream botanical surface. No replacement CSS or SVG art was introduced.
-- Copy and content: page-specific focus, metrics, forms, labels, and records remain coherent and unchanged except for visual treatment.
-- Icons: the established Material Symbols navigation and quick-action icon family remains aligned and readable. Legacy detail icons were preserved because the task was scoped to color consistency.
+- [Fixed] Focus and Habits were not equally integrated with the unified workspace model.
+  - Evidence before fix: Focus rendered as a standalone dark card, while Habits rendered its Goal Garden shell directly inside the unified shell.
+  - Fix: routed Focus and Habits through `GardenWorkspace`, added Habits workspace metadata, restyled Focus with the unified cream/green system, compacted embedded workspace heroes, and converted embedded Goal Garden chrome into a detail module.
+  - Evidence after fix: `desktop-1440x1024-focus.png`, `mobile-390x844-focus.png`, `desktop-1440x1024-habits.png`, and `mobile-390x844-habits.png` render through the same unified navigation and workspace rhythm.
 
-## Comparison history
+- [Fixed] Mobile horizontal overflow in the unified Today view.
+  - Evidence before fix: 390px viewport rendered with 939px document width.
+  - Fix: constrained the unified home grid and journey strip, kept card overflow inside the horizontal journey scroller, and hid page-level horizontal overflow on mobile.
+  - Evidence after fix: desktop and mobile both report `horizontalOverflow: false`.
 
-### Pass 1 — blocked
+- [Fixed] Profile modal keyboard behavior.
+  - Evidence before fix: modal opened without focus inside and did not close on Escape.
+  - Fix: focus moves into the dialog on open, Escape closes it, and backdrop click dismisses it.
+  - Evidence after fix: desktop and mobile both report `focusInside: true` and `closedOnEscape: true`.
 
-- P1: Reports used navy, purple, bright teal, orange, and red chart surfaces unrelated to the selected source.
-- P1: Finance details used saturated red/green blocks and blue summary states that overpowered the cream/forest hierarchy.
-- P2: Tracker pages retained blue/purple gradients, focus rings, pills, and active states.
-- P2: feature banners on Health, Automations, Learning, Notion, Reading, Weekly Review, and Finance used gradients instead of the source's flat botanical surfaces.
-- P2: white text on gold CardHeader surfaces had insufficient visible contrast.
+- [Fixed] Mobile bottom navigation tap obstruction.
+  - Evidence before fix: `TEST VERSION` badge intercepted the Habits nav click.
+  - Fix: made the badge non-interactive and hidden on mobile.
+  - Evidence after fix: Today, Compass, Tasks, Focus, and Habits navigation passed on desktop and mobile.
 
-### Fixes
+- [Fixed] Browser console 404.
+  - Evidence before fix: browser logged one 404 resource error.
+  - Fix: added an inline SVG favicon in `index.html`.
+  - Evidence after fix: console output contains only Vite debug and React DevTools informational messages in development.
 
-- Consolidated shared color tokens in `src/constants/theme.js`.
-- Harmonized tracker styles in `src/components/pages/tracker-pages.css`.
-- Converted custom feature banners to forest surfaces with gold accents and added a scoped fallback for remaining legacy gradient styles.
-- Updated shared buttons and CardHeader text to use dark forest on gold.
+## Fidelity Notes
 
-### Pass 2 — passed
+- Desktop implementation is visually close in palette, type direction, spacing rhythm, core Life Score header, journey cards, and right-side "Now" score summary, but it is not a literal copy of the selected design. The selected design shows a persistent right "Your Garden" panel; the implementation uses a modal profile check-in.
+- Mobile fidelity is intentionally adapted: the five-step journey is horizontally scrollable inside the Today card, while the page itself remains locked to 390px with no body-level overflow.
+- Existing Life Garden raster assets are not visible on the unified Today screen in this implementation, unlike the selected design.
+- Some older page internals still exist below the shared workspace layer, especially detailed trackers with inline styles. The newest pass reduces the most visible nested-shell issues, but it is not a complete component-by-component redesign.
 
-- `qa/color-audit/15-finance-before-after.png` shows finance states reduced to leaf green, cream, neutral green-gray, and muted clay.
-- `qa/color-audit/18-reports-before-final.png` shows report headers, bars, and charts consolidated into forest, leaf, moss, gold, and muted clay.
-- `qa/color-audit/13-finance-mobile-after.png` confirms the palette and hierarchy remain stable at 390 × 844.
-- Browser developer logs were empty.
-- Production build passed with 143 modules transformed.
-- Vitest passed: 5 files, 13 tests.
+## Verification
 
-## Remaining P3 polish
+- `node node_modules\vite\bin\vite.js build`: passed.
+- `node node_modules\vitest\vitest.mjs run`: 16 files passed, 68 tests passed.
+- `QA_BASE_URL=http://127.0.0.1:5173 node scripts\rendered-qa.mjs`: passed desktop/mobile screenshot, overflow, modal, nav, and console checks against the already-running local app.
 
-- A future icon-only pass could replace the older emoji-like detail icons with the Material Symbols family used by the new shell.
-
-final result: passed
+final result: passed with noted design deltas
